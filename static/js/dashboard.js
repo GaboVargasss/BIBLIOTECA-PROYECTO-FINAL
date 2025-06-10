@@ -33,37 +33,31 @@ function loadBooks(){
 function setupBookForm(){
   const form = document.getElementById('bookForm');
   if (!form) return;
-  form.addEventListener('submit',e=>{
+  form.addEventListener('submit', e=>{
     e.preventDefault();
     if (window.userRole!=='admin') return alert('No autorizado');
-    const id = form.dataset.id;
-    const payload = {
-      title: form.title.value,
-      author: form.author.value,
-      description: form.description.value,
-      category_id: parseInt(form.category.value)
-    };
-    const url    = id?`/api/books/${id}`:'/api/books';
-    const method = id?'PUT':'POST';
-    fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(r=>{
-        if (r.ok) { form.reset(); delete form.dataset.id; loadBooks(); }
-      });
+    // … tu código de POST/PUT …
+    // Al terminar:
+    document.getElementById('formContainer').style.display = 'none';
   });
 }
 
 function editBook(id){
-  fetch('/api/books').then(r=>r.json()).then(data=>{
-    const book = data.find(b=>b.id===id);
-    const form = document.getElementById('bookForm');
-    form.title.value       = book.title;
-    form.author.value      = book.author;
-    form.description.value = book.description||'';
-    form.category.value    = book.category_id||'';
-    form.dataset.id        = id;
-    window.scrollTo({top:0,behavior:'smooth'});
-  });
+  fetch('/api/books')
+    .then(r=>r.json())
+    .then(data=>{
+      const book = data.find(b=>b.id===id);
+      const form = document.getElementById('bookForm');
+      form.title.value       = book.title;
+      form.author.value      = book.author;
+      form.description.value = book.description||'';
+      form.category.value    = book.category_id||'';
+      form.dataset.id        = id;
+      document.getElementById('formContainer').style.display = 'block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
 }
+
 
 function deleteBook(id){
   if (window.userRole!=='admin') return alert('No autorizado');

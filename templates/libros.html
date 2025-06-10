@@ -3,8 +3,15 @@
 
 {% block content %}
   <h2 class="mb-4">Gestión de Libros</h2>
-  {% if session.role=='admin' %}
-  <div class="card-form mb-5">
+
+  {% if role=='admin' %}
+    <div class="mb-4 text-center">
+      <button id="btnAddNew" class="btn btn-success">➕ Agregar libro</button>
+    </div>
+  {% endif %}
+
+  <!-- Formulario oculto para añadir/editar -->
+  <div id="formContainer" class="card-form mb-5" style="display:none;">
     <form id="bookForm" data-id="">
       {{ form.hidden_tag() }}
       <div class="row g-3">
@@ -25,22 +32,54 @@
           {{ form.description(class="form-control", rows=2) }}
         </div>
         <div class="col-12 text-end">
+          <button type="button" id="btnCancel" class="btn btn-secondary me-2">Cancelar</button>
           {{ form.submit(class="btn btn-custom") }}
         </div>
       </div>
     </form>
   </div>
-  {% endif %}
 
+  <!-- Tabla de libros -->
   <div class="card p-4">
     <table id="booksTable" class="table table-dark table-striped">
-      <thead><tr><th>ID</th><th>Título</th><th>Autor</th><th>Categoría</th><th>Acciones</th></tr></thead>
-      <tbody></tbody>
+      <thead>
+        <tr>
+          <th>ID</th><th>Título</th><th>Autor</th><th>Categoría</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in books %}
+        <tr>
+          <td>{{ b.id }}</td>
+          <td>{{ b.title }}</td>
+          <td>{{ b.author }}</td>
+          <td>{{ b.category or '—' }}</td>
+          <td>
+            {% if role=='admin' %}
+              <button class="btn btn-sm btn-warning" onclick="editBook({{ b.id }})">✏️</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteBook({{ b.id }})">🗑️</button>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
 {% endblock %}
 
 {% block scripts %}
   {{ super() }}
-  <!-- dashboard.js gestiona AJAX; bloquea CRUD si no admin -->
+  <script>
+    document.getElementById('btnAddNew')?.addEventListener('click',()=>{
+      document.getElementById('formContainer').style.display = 'block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+    document.getElementById('btnCancel')?.addEventListener('click',()=>{
+      document.getElementById('formContainer').style.display = 'none';
+      document.getElementById('bookForm').reset();
+      delete document.getElementById('bookForm').dataset.id;
+    });
+  </script>
 {% endblock %}

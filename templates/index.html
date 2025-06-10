@@ -12,8 +12,16 @@
 {% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Bienvenido {{ current_user.username or 'Visitante' }}</h2>
+    <h2>
+        Bienvenido
+        {% if current_user.is_authenticated %}
+        {{ current_user.ci }}
+        {% else %}
+        Visitante
+        {% endif %}
+    </h2>
     {% if session.role=='guest' %}
       <a href="{{ url_for('auth') }}" class="btn btn-outline-light">Acceder</a>
     {% endif %}

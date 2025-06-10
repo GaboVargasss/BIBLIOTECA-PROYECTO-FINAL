@@ -14,35 +14,41 @@ from models.base import db
 from models.model import User, Book, Category
 from forms import RegistrationForm, ContactForm, BookForm
 
+# Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key')
-# Conexión PostgreSQL a la base original
-app.config['SQLALCHEMY_DATABASE_URI'] = (
+app.config['SQLALCHEMY_DATABASE_URI'] = \
     "postgresql+psycopg2://postgres:241210@localhost:5432/biblioteca"
-)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Inicializar extensiones
+# Extensiones
 db.init_app(app)
 migrate = Migrate(app, db)   # Flask-Migrate
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth'
 
+# Sincronizar la secuencia de 'users.id' al primer request
+from sqlalchemy import text
+
+def sync_user_sequence():
+    """Sincroniza la secuencia de users.id con el valor máximo actual."""
+    sql = text("SELECT setval('users_id_seq', (SELECT COALESCE(MAX(id),1) FROM users))")
+    db.session.execute(sql)
+    db.session.commit()
+
+# Carga de usuario para flask-login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Alias para /index.html → /
+# Alias para /index.html
 app.add_url_rule('/index.html', 'home_html', lambda: redirect(url_for('home')))
 
-# -----------------------------------
-# RUTA DE AUTENTICACIÓN (login/register/visitante)
-# -----------------------------------
+# RUTA DE AUTENTICACIÓN
 @app.route('/auth', methods=['GET', 'POST'])
 def auth():
     if request.method == 'POST':
         action = request.form.get('action')
-        # Continuar como visitante
         if action == 'guest':
             session['role'] = 'guest'
             return redirect(url_for('home'))
@@ -75,21 +81,17 @@ def auth():
 
     return render_template('auth.html')
 
-# -----------------------------------
-# DASHBOARD PRINCIPAL: FILTROS, INDICADORES, GRÁFICOS
-# -----------------------------------
+# DASHBOARD PRINCIPAL
 @app.route('/')
 def home():
     role = session.get('role')
     if not current_user.is_authenticated and role is None:
         return redirect(url_for('auth'))
 
-    # Lectura de filtros
     title  = request.args.get('title', '').strip()
     author = request.args.get('author', '').strip()
     cat_id = request.args.get('category', type=int)
 
-    # Construcción de la consulta
     q = Book.query
     if title:
         q = q.filter(Book.title.ilike(f'%{title}%'))
@@ -99,12 +101,10 @@ def home():
         q = q.filter_by(category_id=cat_id)
     books = q.all()
 
-    # Indicadores
     total_books      = len(books)
     total_users      = User.query.count()
     total_categories = Category.query.count()
 
-    # Datos para gráficos
     cat_data = [
         {'label': c.name, 'count': sum(1 for b in books if b.category_id == c.id)}
         for c in Category.query.all()
@@ -122,13 +122,11 @@ def home():
         total_categories=total_categories,
         cat_data=cat_data,
         top_auth=top_auth_data,
-        categories=categories,            # <-- aquí
+        categories=categories,
         role=role or current_user.role
     )
 
-# -----------------------------------
 # RUTAS AUXILIARES
-# -----------------------------------
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     form = RegistrationForm()
@@ -165,12 +163,17 @@ def instalaciones():
     return render_template('instalaciones.html')
 
 @app.route('/libros')
-@login_required
 def libros():
     form = BookForm()
     cats = Category.query.order_by(Category.name).all()
     form.category.choices = [(c.id, c.name) for c in cats]
-    return render_template('libros.html', form=form, role=session.get('role'))
+    books = Book.query.all()
+    return render_template(
+        'libros.html',
+        form=form,
+        books=books,
+        role=session.get('role')
+    )
 
 @app.route('/masinfo')
 def masinfo():
@@ -181,9 +184,7 @@ def masinfo():
     }
     return render_template('masinfo.html', stats=stats)
 
-# -----------------------------------
-# API CRUD LIBROS (solo admin)
-# -----------------------------------
+# API CRUD LIBROS
 @app.route('/api/books', methods=['GET', 'POST'])
 @login_required
 def api_books():
@@ -212,4 +213,8 @@ def api_book_detail(id):
     return '', 204
 
 if __name__ == '__main__':
+    # Sincronizar secuencia antes de iniciar
+    with app.app_context():
+        sync_user_sequence()
     app.run(debug=True)
+

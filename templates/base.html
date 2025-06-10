@@ -24,25 +24,33 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('home') }}">Hogwarts & Books</a>
-      <button class="navbar-toggler" data-bs-toggle="collapse"
-              data-bs-target="#navMenu"><span class="navbar-toggler-icon"></span></button>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
       <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav ms-auto">
-          {% if session.role=='guest' %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth') }}">Acceder</a>
-            </li>
-          {% else %}
-            {% if current_user.is_authenticated %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Cerrar sesión</a></li>
-            {% else %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('auth') }}">Ingreso / Registro</a></li>
-            {% endif %}
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('contacto') }}">Contáctanos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('instalaciones') }}">Instalaciones</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('libros') }}">Libros</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('masinfo') }}">Más info</a>
+          </li>
+          {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <span class="navbar-text text-warning ms-3">
+              Bienvenido {{ current_user.ci }}
+            </span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-danger" href="{{ url_for('logout') }}">Salir</a>
+          </li>
           {% endif %}
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('contacto') }}">Contáctanos</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('instalaciones') }}">Instalaciones</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('libros') }}">Libros</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('masinfo') }}">Más info</a></li>
         </ul>
       </div>
     </div>
