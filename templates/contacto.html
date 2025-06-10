@@ -1,32 +1,39 @@
 {% extends 'base.html' %}
-{% block title %}Contáctanos{% endblock %}
+{% block title %}Contáctanos – Hogwarts & Books{% endblock %}
 
 {% block content %}
-<div class="container my-5">
   <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+    <div class="col-md-6">
       <div class="card-form">
         <h2 class="text-center mb-4">Contáctanos 💬</h2>
-        <p class="text-center mb-4">¿Tienes alguna duda o sugerencia? ¡Envíanos un mensaje! 😊</p>
-        <form action="#" method="POST">
+        <form method="POST" action="">
+          {{ form.hidden_tag() }}
           <div class="mb-3">
-            <label for="nombreContacto" class="form-label">Tu nombre:</label>
-            <input type="text" id="nombreContacto" name="nombreContacto" class="form-control" required>
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+            {% for err in form.name.errors %}
+              <small class="text-danger">{{ err }}</small>
+            {% endfor %}
           </div>
           <div class="mb-3">
-            <label for="emailContacto" class="form-label">Tu correo electrónico:</label>
-            <input type="email" id="emailContacto" name="emailContacto" class="form-control" required>
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+            {% for err in form.email.errors %}
+              <small class="text-danger">{{ err }}</small>
+            {% endfor %}
           </div>
           <div class="mb-3">
-            <label for="mensaje" class="form-label">Mensaje:</label>
-            <textarea id="mensaje" name="mensaje" rows="5" class="form-control" required></textarea>
+            {{ form.message.label(class="form-label") }}
+            {{ form.message(class="form-control", rows=5) }}
+            {% for err in form.message.errors %}
+              <small class="text-danger">{{ err }}</small>
+            {% endfor %}
           </div>
           <div class="text-center">
-            <button type="submit" class="btn btn-custom">Enviar 🚀</button>
+            {{ form.submit(class="btn btn-custom") }}
           </div>
         </form>
       </div>
     </div>
   </div>
-</div>
 {% endblock %}

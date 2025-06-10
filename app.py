@@ -1,106 +1,215 @@
-# app.py
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from sqlalchemy.exc import NoResultFound
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models.base import Base, engine, SessionLocal
-from models.model import Usuario, Libro, Genero, Autor, Prestamo, EstadoPrestamo, Edicion, Copia, PrestamoEdicion, EstadoEnum
 import os
+from flask import (
+    Flask, render_template, redirect, url_for, flash,
+    request, jsonify, session
+)
+from flask_migrate import Migrate
+from flask_login import (
+    LoginManager, login_user, logout_user,
+    login_required, current_user
+)
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from models.base import db
+from models.model import User, Book, Category
+from forms import RegistrationForm, ContactForm, BookForm
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key')
+# Conexión PostgreSQL a la base original
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    "postgresql+psycopg2://postgres:241210@localhost:5432/biblioteca"
+)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Crear tablas si no existen
-Base.metadata.create_all(bind=engine)
-
-# Sesión DB y Login
-db = SessionLocal()
+# Inicializar extensiones
+db.init_app(app)
+migrate = Migrate(app, db)   # Flask-Migrate
 login_manager = LoginManager(app)
-login_manager.login_view = "auth"
+login_manager.login_view = 'auth'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.query(Usuario).get(int(user_id))
+    return User.query.get(int(user_id))
 
-@app.context_processor
-def inject_user():
-    return dict(username=(current_user.nombre_usuario if current_user.is_authenticated else ""))
+# Alias para /index.html → /
+app.add_url_rule('/index.html', 'home_html', lambda: redirect(url_for('home')))
 
-# --- Rutas de auth ---
-@app.route("/", methods=["GET","POST"])
+# -----------------------------------
+# RUTA DE AUTENTICACIÓN (login/register/visitante)
+# -----------------------------------
+@app.route('/auth', methods=['GET', 'POST'])
 def auth():
-    if current_user.is_authenticated:
-        return redirect(url_for("dashboard"))
-    if request.method=="POST":
-        action = request.form.get("action")
-        nombre = request.form["nombre_usuario"].strip()
-        apellido = request.form["apellido_usuario"].strip()
-        ci = request.form["ci"].strip()
-        tel = request.form["telefono"].strip()
-        dom = request.form["domicilio"].strip()
-        if action=="register":
-            u = Usuario(nombre_usuario=nombre, apellido_usuario=apellido,
-                        ci=ci, telefono=tel, domicilio=dom)
-            db.add(u); db.commit()
-            flash("Usuario creado, ahora inicia sesión","success")
-            return redirect(url_for("auth"))
-        elif action=="login":
-            # en este esquema no hay password, así que login directo por ci
-            try:
-                u = db.query(Usuario).filter_by(ci=ci).one()
-                login_user(u)
-                return redirect(url_for("dashboard"))
-            except NoResultFound:
-                flash("CI no registrado","danger")
-    return render_template("auth.html")
+    if request.method == 'POST':
+        action = request.form.get('action')
+        # Continuar como visitante
+        if action == 'guest':
+            session['role'] = 'guest'
+            return redirect(url_for('home'))
 
-@app.route("/logout")
+        ci  = request.form.get('ci')
+        pwd = request.form.get('password')
+
+        if action == 'login':
+            user = User.query.filter_by(ci=ci).first()
+            if user and check_password_hash(user.password_hash, pwd):
+                login_user(user)
+                session['role'] = user.role
+                return redirect(url_for('home'))
+            flash('Cédula o contraseña incorrecta', 'danger')
+
+        elif action == 'register':
+            if User.query.filter_by(ci=ci).first():
+                flash('Cédula ya registrada', 'warning')
+            else:
+                user = User(
+                    ci=ci,
+                    password_hash=generate_password_hash(pwd),
+                    role='user'
+                )
+                db.session.add(user)
+                db.session.commit()
+                login_user(user)
+                session['role'] = 'user'
+                return redirect(url_for('home'))
+
+    return render_template('auth.html')
+
+# -----------------------------------
+# DASHBOARD PRINCIPAL: FILTROS, INDICADORES, GRÁFICOS
+# -----------------------------------
+@app.route('/')
+def home():
+    role = session.get('role')
+    if not current_user.is_authenticated and role is None:
+        return redirect(url_for('auth'))
+
+    # Lectura de filtros
+    title  = request.args.get('title', '').strip()
+    author = request.args.get('author', '').strip()
+    cat_id = request.args.get('category', type=int)
+
+    # Construcción de la consulta
+    q = Book.query
+    if title:
+        q = q.filter(Book.title.ilike(f'%{title}%'))
+    if author:
+        q = q.filter(Book.author.ilike(f'%{author}%'))
+    if cat_id:
+        q = q.filter_by(category_id=cat_id)
+    books = q.all()
+
+    # Indicadores
+    total_books      = len(books)
+    total_users      = User.query.count()
+    total_categories = Category.query.count()
+
+    # Datos para gráficos
+    cat_data = [
+        {'label': c.name, 'count': sum(1 for b in books if b.category_id == c.id)}
+        for c in Category.query.all()
+    ]
+    from collections import Counter
+    top_auth = Counter(b.author for b in books).most_common(5)
+    top_auth_data = [{'label': a, 'count': n} for a, n in top_auth]
+
+    categories = Category.query.order_by(Category.name).all()
+
+    return render_template(
+        'index.html',
+        total_books=total_books,
+        total_users=total_users,
+        total_categories=total_categories,
+        cat_data=cat_data,
+        top_auth=top_auth_data,
+        categories=categories,            # <-- aquí
+        role=role or current_user.role
+    )
+
+# -----------------------------------
+# RUTAS AUXILIARES
+# -----------------------------------
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        hashed = generate_password_hash(form.password.data)
+        user = User(
+            ci=form.ci.data,
+            password_hash=hashed,
+            role='user'
+        )
+        db.session.add(user)
+        db.session.commit()
+        flash('Registro exitoso. Ya puedes iniciar sesión.', 'success')
+        return redirect(url_for('auth'))
+    return render_template('registro.html', form=form)
+
+@app.route('/logout')
 @login_required
 def logout():
-    logout_user(); flash("Cerraste sesión","info")
-    return redirect(url_for("auth"))
+    logout_user()
+    session.pop('role', None)
+    return redirect(url_for('auth'))
 
-# --- Dashboard principal ---
-@app.route("/dashboard")
+@app.route('/contacto', methods=['GET', 'POST'])
+def contacto():
+    form = ContactForm()
+    if form.validate_on_submit():
+        flash('Mensaje enviado con éxito. ¡Gracias!', 'success')
+        return redirect(url_for('home'))
+    return render_template('contacto.html', form=form)
+
+@app.route('/instalaciones')
+def instalaciones():
+    return render_template('instalaciones.html')
+
+@app.route('/libros')
 @login_required
-def dashboard():
-    # estadísticas básicas
+def libros():
+    form = BookForm()
+    cats = Category.query.order_by(Category.name).all()
+    form.category.choices = [(c.id, c.name) for c in cats]
+    return render_template('libros.html', form=form, role=session.get('role'))
+
+@app.route('/masinfo')
+def masinfo():
     stats = {
-        "total_usuarios": db.query(Usuario).count(),
-        "total_libros": db.query(Libro).count(),
-        "total_copias": db.query(Copia).count(),
-        "prestamos_pendientes": db.query(EstadoPrestamo).filter_by(estado=EstadoEnum.Pendiente).count()
+        'total_books': Book.query.count(),
+        'total_users': User.query.count(),
+        'total_categories': Category.query.count(),
     }
-    return render_template("dashboard.html", stats=stats)
+    return render_template('masinfo.html', stats=stats)
 
-# --- APIs de ejemplo ---
-@app.route("/api/libros")
+# -----------------------------------
+# API CRUD LIBROS (solo admin)
+# -----------------------------------
+@app.route('/api/books', methods=['GET', 'POST'])
 @login_required
-def api_libros():
-    lst = db.query(Libro).all()
-    return jsonify([{
-        "id": l.id_libro,
-        "titulo": l.titulo_libro,
-        "idioma": l.idioma,
-        "paginas": l.numero_paginas,
-        "sinopsis": l.sinopsis
-    } for l in lst])
+def api_books():
+    if request.method == 'GET':
+        return jsonify([b.to_dict() for b in Book.query.all()])
+    if session.get('role') != 'admin':
+        return jsonify({'error': 'No autorizado'}), 403
+    data = request.get_json()
+    book = Book.from_dict(data)
+    db.session.add(book)
+    db.session.commit()
+    return jsonify(book.to_dict()), 201
 
-@app.route("/api/usuarios")
+@app.route('/api/books/<int:id>', methods=['PUT', 'DELETE'])
 @login_required
-def api_usuarios():
-    lst = db.query(Usuario).all()
-    return jsonify([{
-        "id": u.id_usuario,
-        "nombre": u.nombre_usuario,
-        "apellido": u.apellido_usuario,
-        "ci": u.ci
-    } for u in lst])
+def api_book_detail(id):
+    if session.get('role') != 'admin':
+        return jsonify({'error': 'No autorizado'}), 403
+    book = Book.query.get_or_404(id)
+    if request.method == 'PUT':
+        book.update_from_dict(request.get_json())
+        db.session.commit()
+        return jsonify(book.to_dict())
+    db.session.delete(book)
+    db.session.commit()
+    return '', 204
 
-# errores
-@app.errorhandler(404)
-def not_found(e): return render_template("404.html"), 404
-@app.errorhandler(500)
-def server_error(e): return render_template("500.html"), 500
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)

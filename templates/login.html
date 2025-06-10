@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión – Hogwarts & Books{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card-form">
+        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+        <form method="POST" action="">
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            {{ form.ci.label(class="form-label") }}
+            {{ form.ci(class="form-control") }}
+            {% for err in form.ci.errors %}
+              <small class="text-danger">{{ err }}</small>
+            {% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control") }}
+            {% for err in form.password.errors %}
+              <small class="text-danger">{{ err }}</small>
+            {% endfor %}
+          </div>
+          <div class="form-check mb-3">
+            {{ form.remember(class="form-check-input") }}
+            {{ form.remember.label(class="form-check-label") }}
+          </div>
+          <div class="text-center">
+            {{ form.submit(class="btn btn-custom") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

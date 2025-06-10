@@ -1,58 +1,46 @@
 {% extends 'base.html' %}
-{% block title %}Libros{% endblock %}
+{% block title %}Libros – Hogwarts & Books{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-  <h2 class="text-center mb-4">Nuestros Libros</h2>
-
-  <!-- Filtro/Busqueda -->
-  <div class="row mb-4">
-    <div class="col-md-6">
-      <input type="text" id="searchInput" class="form-control" placeholder="Buscar libro...">
-    </div>
-    <div class="col-md-2">
-      <button id="searchBtn" class="btn btn-custom w-100">Buscar</button>
-    </div>
-    <div class="col-md-4 text-end">
-      <button id="mostrarMasBtn" class="btn btn-custom">Mostrar más</button>
-    </div>
-  </div>
-
-  <div id="bookGrid" class="row g-4">
-    {% for book in books %}
-    <div class="col-sm-6 col-md-4 col-lg-3 book-card">
-      <div class="card h-100 text-center book-card">
-        <img src="{{ book.img_url }}" class="card-img-top" alt="{{ book.title }}">
-        <div class="card-body">
-          <h5 class="card-title">{{ book.title }}</h5>
-          <p class="card-text">{{ book.description }}</p>
-          <p class="card-author"><b>Autor:</b> {{ book.author }}</p>
+  <h2 class="mb-4">Gestión de Libros</h2>
+  {% if session.role=='admin' %}
+  <div class="card-form mb-5">
+    <form id="bookForm" data-id="">
+      {{ form.hidden_tag() }}
+      <div class="row g-3">
+        <div class="col-md-4">
+          {{ form.title.label(class="form-label") }}
+          {{ form.title(class="form-control") }}
+        </div>
+        <div class="col-md-4">
+          {{ form.author.label(class="form-label") }}
+          {{ form.author(class="form-control") }}
+        </div>
+        <div class="col-md-4">
+          {{ form.category.label(class="form-label") }}
+          {{ form.category(class="form-select") }}
+        </div>
+        <div class="col-12">
+          {{ form.description.label(class="form-label") }}
+          {{ form.description(class="form-control", rows=2) }}
+        </div>
+        <div class="col-12 text-end">
+          {{ form.submit(class="btn btn-custom") }}
         </div>
       </div>
-    </div>
-    {% endfor %}
+    </form>
   </div>
-</div>
+  {% endif %}
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const cards = Array.from(document.querySelectorAll('.book-card'));
-  let visible = 8;
-  cards.forEach((c,i) => { if(i>=visible) c.classList.add('d-none'); });
+  <div class="card p-4">
+    <table id="booksTable" class="table table-dark table-striped">
+      <thead><tr><th>ID</th><th>Título</th><th>Autor</th><th>Categoría</th><th>Acciones</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+{% endblock %}
 
-  document.getElementById('mostrarMasBtn').onclick = () => {
-    cards.slice(visible, visible+8).forEach(c=>c.classList.remove('d-none'));
-    visible += 8;
-    if (visible >= cards.length) document.getElementById('mostrarMasBtn').classList.add('d-none');
-  };
-
-  document.getElementById('searchBtn').onclick = () => {
-    const term = document.getElementById('searchInput').value.toLowerCase();
-    cards.forEach(c => {
-      const title = c.querySelector('.card-title').textContent.toLowerCase();
-      c.classList.toggle('d-none', !title.includes(term));
-    });
-  };
-});
-</script>
+{% block scripts %}
+  {{ super() }}
+  <!-- dashboard.js gestiona AJAX; bloquea CRUD si no admin -->
 {% endblock %}

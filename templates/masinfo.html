@@ -1,30 +1,44 @@
 {% extends 'base.html' %}
-{% block title %}Más Info{% endblock %}
+{% block title %}Más info – Hogwarts & Books{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-  <!-- Te ofrecemos -->
-  <section class="mb-5 text-center">
-    <h3 class="section-title">Te ofrecemos ⚡</h3>
-    <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <div class="p-2 border rounded">Libros: <strong>{{ stats.total_books }}</strong></div>
-      <div class="p-2 border rounded">Categorías: <strong>{{ stats.total_categories }}</strong></div>
-      <div class="p-2 border rounded">Usuarios: <strong>{{ stats.total_users }}</strong></div>
+  <h2 class="text-center mb-4">Nuestra Biblioteca 🏰</h2>
+
+  <!-- Estadísticas rápidas -->
+  <div class="mb-5 d-flex justify-content-center gap-3 flex-wrap">
+    <div class="p-3 border rounded text-center" style="min-width:110px; border-color:#9A4C10;">
+      Libros<br><strong>{{ stats.total_books }}</strong> 📖
     </div>
-  </section>
+    <div class="p-3 border rounded text-center" style="min-width:110px; border-color:#9A4C10;">
+      Categorías<br><strong>{{ stats.total_categories }}</strong> 🗂
+    </div>
+    <div class="p-3 border rounded text-center" style="min-width:110px; border-color:#9A4C10;">
+      Usuarios<br><strong>{{ stats.total_users }}</strong> 👥
+    </div>
+  </div>
 
   <!-- Sobre Nosotros -->
-  <section class="mb-5 text-center">
-    <h3 class="section-title">Sobre Nosotros 🏰</h3>
-    <p>Somos un grupo de magos y brujas amantes de la lectura. Fundamos Hogwarts & Books en 2025 y nuestra visión es convertir cada lectura en una experiencia mágica. ¡Bienvenidos a nuestro mundo encantado! ✨</p>
+  <section class="mb-5">
+    <h3 class="section-title text-center">Sobre Nosotros 🏰</h3>
+    <p class="text-center">
+      Somos un grupo de magos y brujas amantes de la lectura.
+      Fundamos Hogwarts & Books en el año 2025 y nuestra visión es convertir cada lectura
+      en una experiencia mágica. ¡Bienvenidos a nuestro mundo encantado! ✨
+    </p>
   </section>
 
   <!-- Ubicación -->
-  <section class="text-center">
-    <h3 class="section-title">Ubicación 🧭</h3>
-    <div class="ratio ratio-16x9 mx-auto" style="max-width:600px;">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!..." style="border:0;" allowfullscreen loading="lazy"></iframe>
+  <section>
+    <h3 class="section-title text-center">Ubicación 🧭</h3>
+    <p class="text-center">Nos encontramos en la 3era casa a la izquierda de la entrada en Diagon Alley, mundo mágico.</p>
+    <div class="d-flex justify-content-center">
+      <div class="ratio ratio-16x9" style="max-width:600px;">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2992.4707422700986!2d-8.614857084571485!3d41.14654601925413!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd2464e8041e68d5%3A0xeef89d4df86a4df3!2sLivraria%20Lello!5e0!3m2!1ses-419!2sbo!4v1679972654217!5m2!1ses-419!2sbo"
+          style="border:0;" allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
     </div>
   </section>
-</div>
 {% endblock %}

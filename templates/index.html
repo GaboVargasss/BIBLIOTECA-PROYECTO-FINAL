@@ -1,113 +1,129 @@
-{% extends "base.html" %}
-{% block title %}Dashboard - Biblioteca{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Dashboard – Hogwarts & Books{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Fondo original */
+  body {
+    background: url('{{ url_for("static",filename="img/fachada.jpg") }}')
+                center/cover fixed;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <!-- Stat Cards -->
-  <div class="row g-3 mb-4">
-    <div class="col-sm-6 col-md-3">
-      <div class="stats-card p-3 text-center">
-        <i class="fas fa-book fa-2x mb-2"></i>
-        <div class="metric" id="totalLibros">0</div>
-        <small class="variation">Total Libros</small>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Bienvenido {{ current_user.username or 'Visitante' }}</h2>
+    {% if session.role=='guest' %}
+      <a href="{{ url_for('auth') }}" class="btn btn-outline-light">Acceder</a>
+    {% endif %}
+  </div>
+
+  <!-- FILTROS -->
+  <form class="row g-3 mb-4">
+    <div class="col-md-3">
+      <input name="title" value="{{request.args.title}}" class="form-control" placeholder="Título…">
+    </div>
+    <div class="col-md-3">
+      <input name="author" value="{{request.args.author}}" class="form-control" placeholder="Autor…">
+    </div>
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        <option value="">Todas Categorías</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}"
+            {% if request.args.category == c.id|string %}selected{% endif %}>
+            {{ c.name }}
+        </option>
+        {% endfor %}
+
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-custom w-100">Filtrar</button>
+    </div>
+  </form>
+
+  <!-- INDICADORES -->
+  <div class="row text-center mb-5">
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h4>Libros</h4>
+        <p class="display-6">{{ total_books }}</p>
       </div>
     </div>
-    <div class="col-sm-6 col-md-3">
-      <div class="stats-card p-3 text-center">
-        <i class="fas fa-folder-open fa-2x mb-2"></i>
-        <div class="metric" id="totalCategorias">0</div>
-        <small class="variation">Total Categorías</small>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h4>Usuarios</h4>
+        <p class="display-6">{{ total_users }}</p>
       </div>
     </div>
-    <div class="col-sm-6 col-md-3">
-      <div class="stats-card p-3 text-center">
-        <i class="fas fa-user fa-2x mb-2"></i>
-        <div class="metric" id="totalUsuarios">0</div>
-        <small class="variation">Total Usuarios</small>
-      </div>
-    </div>
-    <div class="col-sm-6 col-md-3">
-      <div class="stats-card p-3 text-center">
-        <i class="fas fa-calendar-alt fa-2x mb-2"></i>
-        <div class="metric" id="anioTop">2025</div>
-        <small class="variation">Año con más altas</small>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h4>Categorías</h4>
+        <p class="display-6">{{ total_categories }}</p>
       </div>
     </div>
   </div>
 
-  <!-- Filtros -->
-  <div class="row mb-3">
-    <div class="col-md-4 mb-2">
-      <label class="form-label">Categoría</label>
-      <select id="filterCategoria" multiple="multiple" style="width:100%"></select>
-    </div>
-    <div class="col-md-4 mb-2">
-      <label class="form-label">Año Publicación</label>
-      <select id="filterYear" multiple="multiple" style="width:100%"></select>
-    </div>
-    <div class="col-md-4 mb-2">
-      <label class="form-label">Buscar Título</label>
-      <input type="text" id="searchTitle" class="form-control" placeholder="Título..." />
-    </div>
-  </div>
-
-  <!-- Botones toggle tabla/gráficos -->
-  <div class="d-flex gap-2 mb-3">
-    <button id="toggleTable" class="btn btn-outline-light btn-sm">Ocultar Tabla</button>
-    <button id="toggleCharts" class="btn btn-outline-light btn-sm">Ocultar Gráficos</button>
-  </div>
-
-  <!-- Tabla de Libros -->
-  <h2 id="tableTitle" class="text-center text-primary fw-bold mb-2">Listado de Libros</h2>
-  <div id="tablaContainer" class="card mb-4 shadow-sm">
-    <div class="card-body p-2">
-      <div class="table-responsive">
-        <table id="tablaLibros" class="table table-striped table-sm mb-0">
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Autor</th>
-              <th>Categoría</th>
-              <th>Año</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+  <!-- GRÁFICOS -->
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card p-3">
+        <h5>Libros por Categoría</h5>
+        <canvas id="chartCats"></canvas>
       </div>
     </div>
-  </div>
-
-  <!-- Gráficos -->
-  <h2 id="chartsTitle" class="text-center text-primary fw-bold mb-2">Visualizaciones</h2>
-  <div id="sectionCharts" class="row gy-4">
-    <div class="col-md-6">
-      <div class="card p-3 chart-box">
-        <canvas id="pieCategoria"></canvas>
+    <div class="col-lg-6 mb-4">
+      <div class="card p-3">
+        <h5>Top 5 Autores</h5>
+        <canvas id="chartAuth"></canvas>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="card p-3 chart-box">
-        <canvas id="barAnio"></canvas>
+    {% if session.role!='guest' %}
+    <div class="col-12 mb-4">
+      <div class="card p-3">
+        <h5>Evolución Mensual de Préstamos</h5>
+        <canvas id="chartLoan"></canvas>
       </div>
     </div>
+    {% endif %}
   </div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-  // Simulamos datos; en producción vendrían de una API (/api/libros)
-  const allData = [
-    { titulo: "La Casa de los Espíritus", autor:"Isabel Allende", categoria:"Ficción", year:1982 },
-    { titulo: "Cien Años de Soledad", autor:"G.G. Márquez", categoria:"Realismo", year:1967 },
-    // … más libros …
-  ];
-</script>
-<script>
-  // Aquí va la lógica idéntica a la del dashboard de cáncer,
-  // pero adaptada a campos: categoria, year, titulo.
-  // - popularFiltros()
-  // - aplicarFiltrosYGraficos()
-  // - cargarTabla()
-  // - renderGraficos()
-  // Puedes reusar el static/js/dashboard.js directamente.
-</script>
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const catData  = {{ cat_data|tojson }};
+    const authData = {{ top_auth|tojson }};
+    const loanData = Array.from({length:12}, ()=>Math.floor(Math.random()*20)+5);
+
+    new Chart(document.getElementById('chartCats'), {
+      type:'doughnut',
+      data:{
+        labels:catData.map(o=>o.label),
+        datasets:[{data:catData.map(o=>o.count)}]
+      }
+    });
+    new Chart(document.getElementById('chartAuth'), {
+      type:'bar',
+      data:{
+        labels:authData.map(o=>o.label),
+        datasets:[{data:authData.map(o=>o.count)}]
+      }
+    });
+    {% if session.role!='guest' %}
+    new Chart(document.getElementById('chartLoan'), {
+      type:'line',
+      data:{
+        labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+        datasets:[{
+          label:'Préstamos', data:loanData, fill:false, tension:0.4
+        }]
+      },
+      options:{animation:{duration:1500}}
+    });
+    {% endif %}
+  </script>
 {% endblock %}

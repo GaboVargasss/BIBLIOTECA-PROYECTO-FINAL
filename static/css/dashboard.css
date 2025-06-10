@@ -1,55 +1,88 @@
-:root {
-  /* Colores biblioteca */
-  --bg-dark: #121212;
-  --bg-light: #fdf8f5;
-  --accent: #9A4C10;
-  --text-light: #f2ece4;
-  --text-dark: #333;
-  --primary: #2C1B0F;
-  --secondary: #7b0d2b;
-  --transition: 0.3s ease;
+/* RESET BÁSICO */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html, body {
-  background-color: var(--bg-dark);
-  color: var(--text-light);
+/* FUENTES & PALETA OSCURA */
+body {
   font-family: 'Montserrat', sans-serif;
-  transition: background-color var(--transition), color var(--transition);
+  background-color: #121212;
+  color: #f1f1f1;
+  overflow-x: hidden;
 }
 
-/* Modo claro */
-[data-bs-theme="light"] {
-  background-color: var(--bg-light);
-  color: var(--text-dark);
+/* BOTÓN CUSTOM */
+.btn-custom {
+  background: #444;
+  color: #f1f1f1;
+  border: none;
+  transition: background 0.3s ease;
+}
+.btn-custom:hover {
+  background: #666;
 }
 
-/* Stats cards */
-.stats-card {
-  background: rgba(255,255,255,0.05);
-  border-radius: .5rem;
-  transition: transform var(--transition), background var(--transition);
+/* TARJETAS Y FORMULARIOS */
+.card, .card-form {
+  background: #1e1e1e;
+  border: 1px solid #3A1F0B;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
-.stats-card:hover {
-  transform: translateY(-4px);
-  background: rgba(255,255,255,0.1);
+.card-form {
+  padding: 30px;
+  transition: transform 0.3s ease;
 }
-
-/* Tables */
-.table {
-  font-size: .85rem;
-}
-
-/* Chart boxes */
-.chart-box {
-  height: 300px;
+.card-form:hover {
+  transform: scale(1.02);
 }
 
-/* Toggle buttons */
-.btn-outline-light {
-  transition: background var(--transition), color var(--transition);
+/* INPUTS Y TEXTAREAS */
+.form-control, textarea {
+  background: #222;
+  border: 1px solid #333;
+  color: #f1f1f1;
+}
+.form-control:focus, textarea:focus {
+  border-color: #9A4C10;
+  box-shadow: none;
 }
 
-/* Select2 */
-.select2-container--bootstrap-5 .select2-selection--multiple {
-  min-height: calc(1.5em + .75rem + 2px);
+/* TITULARES MEDIEVAL */
+h2, h3 {
+  font-family: 'MedievalSharp', serif;
+}
+
+/* SECCIÓN CON BARRA SUBRAYADA */
+.section-title {
+  border-bottom: 1px solid #3A1F0B;
+  padding-bottom: 5px;
+  color: #9A4C10;
+  margin-bottom: 15px;
+}
+
+/* EFECTO DE FONDO ANIMADO */
+body {
+  background-image: url("/static/img/pattern-cubes.png");
+  animation: moveBackground 30s linear infinite;
+}
+@keyframes moveBackground {
+  from { background-position: 0 0; }
+  to { background-position: 1000px 1000px; }
+}
+
+/* ESTILOS PARA LA TABLA DE LIBROS (AJAX) */
+#booksTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+#booksTable th, #booksTable td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: left;
+}
+#booksTable th {
+  background: #2C1B0F;
 }

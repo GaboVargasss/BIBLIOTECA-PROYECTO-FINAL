@@ -1,102 +1,72 @@
-$(document).ready(function () {
-  // Inicializar Select2
-  $('#filterCategoria, #filterYear').select2({ theme: 'bootstrap-5', placeholder:'Seleccionar…', allowClear:true });
-
-  // Eventos
-  $('#filterCategoria, #filterYear').on('change', aplicarFiltrosYGraficos);
-  $('#searchTitle').on('input', aplicarFiltrosYGraficos);
-  $('#toggleTable').on('click', function(){
-    $('#tablaContainer, #tableTitle').toggleClass('d-none');
-    $(this).text( $('#tablaContainer').hasClass('d-none') ? 'Mostrar Tabla' : 'Ocultar Tabla' );
-  });
-  $('#toggleCharts').on('click', function(){
-    $('#sectionCharts, #chartsTitle').toggleClass('d-none');
-    $(this).text( $('#sectionCharts').hasClass('d-none') ? 'Mostrar Gráficos' : 'Ocultar Gráficos' );
-  });
-  $('#toggleTheme').on('click', function(){
-    const html = document.documentElement;
-    const isDark = html.getAttribute('data-bs-theme')==='dark';
-    html.setAttribute('data-bs-theme', isDark?'light':'dark');
-    $(this).text(isDark?'Modo Oscuro 🌙':'Modo Claro 🌞');
-  });
-
-  // Carga inicial
-  allData.sort((a,b)=>a.year-b.year);
-  popularFiltros();
-  aplicarFiltrosYGraficos();
+document.addEventListener('DOMContentLoaded',()=>{
+  if (window.location.pathname.includes('/libros')) {
+    loadBooks();
+    setupBookForm();
+  }
 });
 
-function popularFiltros(){
-  const cats = [...new Set(allData.map(d=>d.categoria))].sort();
-  const yrs = [...new Set(allData.map(d=>d.year))].sort();
-  llenar('#filterCategoria', cats);
-  llenar('#filterYear', yrs);
-}
-function llenar(sel, arr){
-  const $s = $(sel).empty().append('<option/>');
-  arr.forEach(v=>$s.append(`<option value="${v}">${v}</option>`));
-  $s.trigger('change');
-}
-
-function aplicarFiltrosYGraficos(){
-  const cat = $('#filterCategoria').val()||[];
-  const yr  = $('#filterYear').val()||[];
-  const txt = $('#searchTitle').val().toLowerCase();
-  const filtered = allData.filter(d=>
-    (cat.length===0||cat.includes(d.categoria)) &&
-    (yr.length===0||yr.includes(String(d.year))) &&
-    (!txt||d.titulo.toLowerCase().includes(txt))
-  );
-  actualizarStats(filtered);
-  cargarTabla(filtered);
-  renderGraficos(filtered);
-}
-
-function actualizarStats(data){
-  $('#totalLibros').text(data.length);
-  const cats = [...new Set(data.map(d=>d.categoria))].length;
-  $('#totalCategorias').text(cats);
-  // simulamos usuarios
-  $('#totalUsuarios').text(40);
-  // año con más entradas
-  const countYr = {};
-  data.forEach(d=>countYr[d.year]=(countYr[d.year]||0)+1);
-  const top = Object.entries(countYr).sort((a,b)=>b[1]-a[1])[0]?.[0]||'N/A';
-  $('#anioTop').text(top);
+function loadBooks(){
+  fetch('/api/books')
+    .then(r=>r.json())
+    .then(data=>{
+      const tbody = document.querySelector('#booksTable tbody');
+      tbody.innerHTML = '';
+      data.forEach(b=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td>${b.id}</td>
+          <td>${b.title}</td>
+          <td>${b.author}</td>
+          <td>${b.category||''}</td>
+          <td>
+            ${window.userRole==='admin'
+              ? `<button onclick="editBook(${b.id})" class="btn btn-sm btn-warning">✏️</button>
+                 <button onclick="deleteBook(${b.id})" class="btn btn-sm btn-danger">🗑️</button>`
+              : `<span class="text-muted">—</span>`
+            }
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    });
 }
 
-function cargarTabla(data){
-  if($.fn.DataTable.isDataTable('#tablaLibros')){
-    $('#tablaLibros').DataTable().clear().destroy();
-  }
-  $('#tablaLibros').DataTable({
-    data: data.map(d=>[d.titulo,d.autor,d.categoria,d.year]),
-    columns: [
-      {title:"Título"}, {title:"Autor"}, {title:"Categoría"}, {title:"Año", className:"text-end"}
-    ],
-    responsive:true, autoWidth:false, pageLength:8,
-    language:{search:"",lengthMenu:"Mostrar _MENU_",paginate:{next:"Siguiente",previous:"Anterior"}}
+function setupBookForm(){
+  const form = document.getElementById('bookForm');
+  if (!form) return;
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    if (window.userRole!=='admin') return alert('No autorizado');
+    const id = form.dataset.id;
+    const payload = {
+      title: form.title.value,
+      author: form.author.value,
+      description: form.description.value,
+      category_id: parseInt(form.category.value)
+    };
+    const url    = id?`/api/books/${id}`:'/api/books';
+    const method = id?'PUT':'POST';
+    fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(r=>{
+        if (r.ok) { form.reset(); delete form.dataset.id; loadBooks(); }
+      });
   });
 }
 
-let pieChart, barChart;
-function renderGraficos(data){
-  // Pie por categoría
-  const cntCat = {};
-  data.forEach(d=>cntCat[d.categoria]=(cntCat[d.categoria]||0)+1);
-  const labs = Object.keys(cntCat), vals = labs.map(l=>cntCat[l]);
-  pieChart?.destroy();
-  pieChart = new Chart($('#pieCategoria'), {
-    type:'pie', data:{labels:labs,datasets:[{data:vals}]},
-    options:{plugins:{title:{display:true,text:'Libros por Categoría'}}}
+function editBook(id){
+  fetch('/api/books').then(r=>r.json()).then(data=>{
+    const book = data.find(b=>b.id===id);
+    const form = document.getElementById('bookForm');
+    form.title.value       = book.title;
+    form.author.value      = book.author;
+    form.description.value = book.description||'';
+    form.category.value    = book.category_id||'';
+    form.dataset.id        = id;
+    window.scrollTo({top:0,behavior:'smooth'});
   });
+}
 
-  // Bar por año
-  const cntYr={}, yrs=[...new Set(data.map(d=>d.year))].sort((a,b)=>a-b);
-  yrs.forEach(y=>cntYr[y]=(data.filter(d=>d.year===y).length));
-  barChart?.destroy();
-  barChart = new Chart($('#barAnio'), {
-    type:'bar', data:{labels:yrs,datasets:[{label:'Libros',data:yrs.map(y=>cntYr[y])}]},
-    options:{plugins:{title:{display:true,text:'Libros por Año'}},scales:{y:{beginAtZero:true}}}
-  });
+function deleteBook(id){
+  if (window.userRole!=='admin') return alert('No autorizado');
+  fetch(`/api/books/${id}`,{method:'DELETE'})
+    .then(r=>{ if (r.status===204) loadBooks(); });
 }

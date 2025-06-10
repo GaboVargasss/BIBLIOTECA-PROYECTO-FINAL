@@ -1,0 +1,4 @@
+-- Terminar conexiones con la base de datos 'biblioteca'
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'biblioteca' AND pid <> pg_backend_pid();
