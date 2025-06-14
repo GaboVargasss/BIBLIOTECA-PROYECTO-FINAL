@@ -44,7 +44,7 @@ from forms import RegistrationForm, ContactForm, BookForm
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = \
-    "postgresql+psycopg2://postgres:2deabril2005@localhost:5432/biblioteca"
+    "postgresql://db_biblioteca_bs8q_user:0m2qLerwHAWHixIsvTztKim01596d1O6@dpg-d16aur8dl3ps7396obb0-a.oregon-postgres.render.com/db_biblioteca_bs8q"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Extensiones
@@ -728,4 +728,6 @@ def download_report(report_type):
 if __name__ == '__main__':
     with app.app_context():
         sync_sequences()
-    app.run(debug=True)
+    ##app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Render asigna el puerto dinámicamente
+    app.run(host='0.0.0.0', port=port)
