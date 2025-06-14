@@ -13,6 +13,19 @@ body {
   overflow-x: hidden;
 }
 
+/* Aplicar el fondo a todo el body */
+body {
+  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+  animation: moveBackground 30s linear infinite;
+}
+
+/* Excepción para la página principal */
+body.home-page, /* Si usas una clase */
+body#main-page { /* Si usas un ID */
+  background-image: none;
+  background-color: #121212;
+}
+
 /* BOTÓN CUSTOM */
 .btn-custom {
   background: #444;
@@ -64,10 +77,6 @@ h2, h3 {
 }
 
 /* EFECTO DE FONDO ANIMADO */
-body {
-  background-image: url("/static/img/pattern-cubes.png");
-  animation: moveBackground 30s linear infinite;
-}
 @keyframes moveBackground {
   from { background-position: 0 0; }
   to { background-position: 1000px 1000px; }

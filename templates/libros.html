@@ -139,6 +139,17 @@
         </div>
       </div>
     {% else %}
+      <div class="row mb-4">
+    <div class="col-md-6 offset-md-3">
+      <div class="input-group">
+        <input type="text" id="searchInput" class="form-control" placeholder="Buscar libros por título, autor o categoría...">
+        <button class="btn btn-primary" id="searchBtn">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+    </div>
+  </div>
+    
       <!-- Grid de libros para visitantes/usuarios normales -->
 <div id="booksContainer">
   {% if books %}
@@ -353,6 +364,7 @@
       </div>
     {% endif %}
   </div>
+  
 
   <!-- Modal para reportes -->
   <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
@@ -367,6 +379,49 @@
 {% block scripts %}
   {{ super() }}
   <script>
+    // Función de búsqueda
+    function searchBooks() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const bookCards = document.querySelectorAll('.book-card');
+      
+      bookCards.forEach(card => {
+        const title = card.querySelector('.book-title').textContent.toLowerCase();
+        const author = card.querySelector('.card-text small').textContent.toLowerCase();
+        const category = card.querySelector('.badge').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || 
+            author.includes(searchTerm) || 
+            category.includes(searchTerm)) {
+          card.parentElement.style.display = 'block';
+        } else {
+          card.parentElement.style.display = 'none';
+        }
+      });
+      
+      // Mostrar mensaje si no hay resultados
+      const visibleBooks = document.querySelectorAll('.book-card:visible');
+      if (visibleBooks.length === 0) {
+        showError('No se encontraron libros que coincidan con la búsqueda');
+      }
+    }
+
+    // Event listeners para la búsqueda
+    document.getElementById('searchBtn').addEventListener('click', searchBooks);
+    
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        searchBooks();
+      }
+    });
+
+    // Mostrar todos los libros al borrar la búsqueda
+    document.getElementById('searchInput').addEventListener('input', function() {
+      if (this.value === '') {
+        document.querySelectorAll('.book-card').forEach(card => {
+          card.parentElement.style.display = 'block';
+        });
+      }
+    });
     // Variables globales
     let currentAction = 'create'; // 'create' o 'edit'
     let currentBookId = null;

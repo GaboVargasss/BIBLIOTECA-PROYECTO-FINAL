@@ -86,33 +86,26 @@
   </form>
 
   <!-- INDICADORES -->
-  <div class="row text-center mb-5">
-    <div class="col-md-3">
+  <div class="row justify-content-center mb-5">  <!-- Cambiado a justify-content-center -->
+    <div class="col-md-3 col-8 mb-3 mb-md-0">  <!-- Añadido col-8 y mb-3 para móviles -->
       <div class="card p-3">
         <h4 style="color: #f8f9fa;">Libros</h4>
         <p class="display-6" style="color: #4dabf7;">{{ total_books }}</p>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-8 mb-3 mb-md-0">
       <div class="card p-3">
         <h4 style="color: #f8f9fa;">Usuarios</h4>
         <p class="display-6" style="color: #ff8787;">{{ total_users }}</p>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-8">
       <div class="card p-3">
         <h4 style="color: #f8f9fa;">Categorías</h4>
         <p class="display-6" style="color: #69db7c;">{{ total_categories }}</p>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card p-3">
-        <h4 style="color: #f8f9fa;">Préstamos</h4>
-        <p class="display-6" style="color: #f783ac;">{{ total_loans }}</p>
-      </div>
-    </div>
   </div>
-
   <!-- GRÁFICOS -->
   <div class="row">
     <div class="col-lg-6 mb-4">
