@@ -7,21 +7,55 @@
   body {
     background: url('{{ url_for("static",filename="img/fachada.jpg") }}')
                 center/cover fixed;
+    color: #f8f9fa;
+  }
+  
+  /* Estilos para mejorar la visibilidad con tema oscuro */
+  .card {
+    background-color: rgba(33, 37, 41, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    border: 1px solid #495057;
+  }
+  
+  h2, h4, h5, p {
+    color: #f8f9fa;
+  }
+  
+  .form-control, .form-select {
+    background-color: #495057;
+    border: 1px solid #6c757d;
+    color: #f8f9fa;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #495057;
+    color: #f8f9fa;
+    border-color: #6c757d;
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+  }
+  
+  .btn-custom {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+  }
+  
+  .btn-custom:hover {
+    background-color: #5a6268;
+    color: white;
+  }
+  
+  .btn-outline-light:hover {
+    background-color: rgba(248, 249, 250, 0.1);
   }
 </style>
 {% endblock %}
 
 {% block content %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Bienvenido {{ current_user.username or 'Visitante' }}</h2>
-    <h2>
-        Bienvenido
-        {% if current_user.is_authenticated %}
-        {{ current_user.ci }}
-        {% else %}
-        Visitante
-        {% endif %}
-    </h2>
+    <h2 style="color: #f8f9fa; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Bienvenido {{ current_user.username  }}</h2>
+    
     {% if session.role=='guest' %}
       <a href="{{ url_for('auth') }}" class="btn btn-outline-light">Acceder</a>
     {% endif %}
@@ -44,7 +78,6 @@
             {{ c.name }}
         </option>
         {% endfor %}
-
       </select>
     </div>
     <div class="col-md-3">
@@ -54,22 +87,28 @@
 
   <!-- INDICADORES -->
   <div class="row text-center mb-5">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card p-3">
-        <h4>Libros</h4>
-        <p class="display-6">{{ total_books }}</p>
+        <h4 style="color: #f8f9fa;">Libros</h4>
+        <p class="display-6" style="color: #4dabf7;">{{ total_books }}</p>
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card p-3">
-        <h4>Usuarios</h4>
-        <p class="display-6">{{ total_users }}</p>
+        <h4 style="color: #f8f9fa;">Usuarios</h4>
+        <p class="display-6" style="color: #ff8787;">{{ total_users }}</p>
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card p-3">
-        <h4>Categorías</h4>
-        <p class="display-6">{{ total_categories }}</p>
+        <h4 style="color: #f8f9fa;">Categorías</h4>
+        <p class="display-6" style="color: #69db7c;">{{ total_categories }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h4 style="color: #f8f9fa;">Préstamos</h4>
+        <p class="display-6" style="color: #f783ac;">{{ total_loans }}</p>
       </div>
     </div>
   </div>
@@ -78,24 +117,28 @@
   <div class="row">
     <div class="col-lg-6 mb-4">
       <div class="card p-3">
-        <h5>Libros por Categoría</h5>
+        <h5 style="color: #f8f9fa;">Libros por Categoría</h5>
         <canvas id="chartCats"></canvas>
       </div>
     </div>
     <div class="col-lg-6 mb-4">
       <div class="card p-3">
-        <h5>Top 5 Autores</h5>
+        <h5 style="color: #f8f9fa;">Top 5 Autores</h5>
         <canvas id="chartAuth"></canvas>
       </div>
     </div>
-    {% if session.role!='guest' %}
-    <div class="col-12 mb-4">
+    <div class="col-lg-6 mb-4">
       <div class="card p-3">
-        <h5>Evolución Mensual de Préstamos</h5>
+        <h5 style="color: #f8f9fa;">Evolución Mensual de Préstamos</h5>
         <canvas id="chartLoan"></canvas>
       </div>
     </div>
-    {% endif %}
+    <div class="col-lg-6 mb-4">
+      <div class="card p-3">
+        <h5 style="color: #f8f9fa;">Estado de Préstamos</h5>
+        <canvas id="chartLoanStatus"></canvas>
+      </div>
+    </div>
   </div>
 {% endblock %}
 
@@ -103,35 +146,206 @@
   {{ super() }}
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // Configuración común para todos los gráficos con tema oscuro
+    Chart.defaults.color = '#f8f9fa';
+    Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    Chart.defaults.font.size = 14;
+    
     const catData  = {{ cat_data|tojson }};
     const authData = {{ top_auth|tojson }};
     const loanData = Array.from({length:12}, ()=>Math.floor(Math.random()*20)+5);
+    const loanStatusData = {
+      labels: ['Activos', 'Devueltos', 'Atrasados'],
+      counts: [Math.floor(Math.random()*30)+10, Math.floor(Math.random()*50)+20, Math.floor(Math.random()*15)+5]
+    };
 
+    // Colores para los gráficos (tonos que combinen con Harry Potter)
+    const backgroundColors = [
+      'rgba(109, 158, 235, 0.8)',  // Gryffindor red/azul
+      'rgba(180, 20, 20, 0.8)',    // Gryffindor rojo
+      'rgba(20, 120, 20, 0.8)',    // Slytherin verde
+      'rgba(200, 180, 50, 0.8)',   // Hufflepuff amarillo
+      'rgba(100, 50, 180, 0.8)',   // Ravenclaw azul
+      'rgba(220, 120, 50, 0.8)',   // Naranja
+      'rgba(150, 150, 150, 0.8)',  // Gris
+      'rgba(200, 100, 150, 0.8)'   // Rosa
+    ];
+
+    // Gráfico 1: Libros por categoría
     new Chart(document.getElementById('chartCats'), {
       type:'doughnut',
       data:{
         labels:catData.map(o=>o.label),
-        datasets:[{data:catData.map(o=>o.count)}]
+        datasets:[{
+          data:catData.map(o=>o.count),
+          backgroundColor: backgroundColors,
+          borderColor: 'rgba(33, 37, 41, 0.8)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              color: '#f8f9fa',
+              font: {
+                size: 12
+              }
+            }
+          }
+        }
       }
     });
+    
+    // Gráfico 2: Top autores
     new Chart(document.getElementById('chartAuth'), {
       type:'bar',
       data:{
         labels:authData.map(o=>o.label),
-        datasets:[{data:authData.map(o=>o.count)}]
+        datasets:[{
+          data:authData.map(o=>o.count),
+          backgroundColor: backgroundColors.slice(0, authData.length),
+          borderColor: 'rgba(33, 37, 41, 0.8)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(248, 249, 250, 0.1)'
+            },
+            ticks: {
+              color: '#f8f9fa'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#f8f9fa'
+            }
+          }
+        }
       }
     });
-    {% if session.role!='guest' %}
+    
+    // Gráfico 3: Evolución mensual de préstamos
     new Chart(document.getElementById('chartLoan'), {
       type:'line',
       data:{
         labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
         datasets:[{
-          label:'Préstamos', data:loanData, fill:false, tension:0.4
+          label:'Préstamos', 
+          data:loanData, 
+          fill: true,
+          tension:0.4,
+          borderColor: 'rgba(180, 20, 20, 0.8)',
+          backgroundColor: 'rgba(180, 20, 20, 0.2)',
+          borderWidth: 3,
+          pointBackgroundColor: 'rgba(180, 20, 20, 1)',
+          pointRadius: 5
         }]
       },
-      options:{animation:{duration:1500}}
+      options:{
+        animation:{duration:1500},
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(248, 249, 250, 0.1)'
+            },
+            ticks: {
+              color: '#f8f9fa'
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(248, 249, 250, 0.1)'
+            },
+            ticks: {
+              color: '#f8f9fa'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#f8f9fa'
+            }
+          }
+        }
+      }
     });
-    {% endif %}
+
+// Gráfico 4: Estado de préstamos (Radar)
+new Chart(document.getElementById('chartLoanStatus'), {
+  type: 'radar',
+  data: {
+    labels: loanStatusData.labels,
+    datasets: [{
+      label: 'Estadísticas de Préstamos',
+      data: loanStatusData.counts,
+      backgroundColor: 'rgba(180, 20, 20, 0.2)',
+      borderColor: 'rgba(180, 20, 20, 0.8)',
+      pointBackgroundColor: 'rgba(180, 20, 20, 1)',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: 'rgba(180, 20, 20, 1)',
+      borderWidth: 2,
+      pointRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: '#f8f9fa',
+          font: {
+            size: 12
+          }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label + ': ' + context.raw;
+          }
+        }
+      }
+    },
+    scales: {
+      r: {
+        angleLines: {
+          color: 'rgba(248, 249, 250, 0.1)'
+        },
+        grid: {
+          color: 'rgba(248, 249, 250, 0.1)'
+        },
+        pointLabels: {
+          color: '#f8f9fa',
+          font: {
+            size: 12
+          }
+        },
+        ticks: {
+          display: false,
+          stepSize: 10
+        },
+        suggestedMin: 0
+      }
+    },
+    elements: {
+      line: {
+        tension: 0.1
+      }
+    }
+  }
+});
   </script>
 {% endblock %}

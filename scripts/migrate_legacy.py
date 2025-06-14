@@ -13,7 +13,7 @@ from app import app
 from models.base import db
 from models.model import User, Category, Book
 
-LEGACY_DB_URL = "postgresql+psycopg2://postgres:241210@localhost:5432/biblioteca"
+LEGACY_DB_URL = "postgresql+psycopg2://postgres:2deabril2005@localhost:5432/biblioteca"
 legacy_engine = create_engine(LEGACY_DB_URL)
 LegacySession = sessionmaker(bind=legacy_engine)
 legacy_sess = LegacySession()

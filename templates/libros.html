@@ -2,84 +2,785 @@
 {% block title %}Libros – Hogwarts & Books{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Gestión de Libros</h2>
+  <h2 class="mb-4 text-white">Gestión de Libros</h2>
+
+  <!-- Mensaje de error -->
+  <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>
 
   {% if role=='admin' %}
     <div class="mb-4 text-center">
-      <button id="btnAddNew" class="btn btn-success">➕ Agregar libro</button>
+      <button id="btnAddNew" class="btn btn-success btn-glow">➕ Agregar libro</button>
+    </div>
+
+    <!-- Formulario oculto para añadir/editar (solo admin) -->
+    <div id="formContainer" class="card-form mb-5" style="display:none;">
+      <form id="bookForm" data-id="">
+        {{ form.hidden_tag() }}
+        <div class="row g-3">
+          <div class="col-md-4">
+            {{ form.title.label(class="form-label text-white") }}
+            {{ form.title(class="form-control") }}
+          </div>
+          <div class="col-md-4">
+            {{ form.author.label(class="form-label text-white") }}
+            {{ form.author(class="form-control") }}
+          </div>
+          <div class="col-md-4">
+            {{ form.category.label(class="form-label text-white") }}
+            {{ form.category(class="form-select") }}
+          </div>
+          <div class="col-12">
+            {{ form.description.label(class="form-label text-white") }}
+            {{ form.description(class="form-control", rows=2) }}
+          </div>
+          <div class="col-12 text-end">
+            <button type="button" id="btnCancel" class="btn btn-secondary me-2">Cancelar</button>
+            <button type="button" id="btnSubmit" class="btn btn-custom btn-glow">Guardar</button>
+          </div>
+        </div>
+      </form>
     </div>
   {% endif %}
 
-  <!-- Formulario oculto para añadir/editar -->
-  <div id="formContainer" class="card-form mb-5" style="display:none;">
-    <form id="bookForm" data-id="">
-      {{ form.hidden_tag() }}
-      <div class="row g-3">
-        <div class="col-md-4">
-          {{ form.title.label(class="form-label") }}
-          {{ form.title(class="form-control") }}
+  <!-- Presentación de libros -->
+  <div class="container">
+    {% if role=='admin' %}
+      <!-- Reportes para admin -->
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <div class="card bg-dark text-white h-100 report-card">
+            <div class="card-header bg-primary">
+              <h5 class="card-title mb-0">Historial de préstamos de un usuario</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Consulta el historial completo de préstamos realizados por un usuario específico.</p>
+              <button class="btn btn-sm btn-outline-light report-btn">Generar Reporte</button>
+            </div>
+          </div>
         </div>
-        <div class="col-md-4">
-          {{ form.author.label(class="form-label") }}
-          {{ form.author(class="form-control") }}
+        
+        <div class="col-md-6 mb-3">
+          <div class="card bg-dark text-white h-100 report-card">
+            <div class="card-header bg-success">
+              <h5 class="card-title mb-0">Inventario actual de copias disponibles</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Muestra el listado de todas las copias de libros disponibles para préstamo.</p>
+              <button class="btn btn-sm btn-outline-light report-btn">Generar Reporte</button>
+            </div>
+          </div>
         </div>
-        <div class="col-md-4">
-          {{ form.category.label(class="form-label") }}
-          {{ form.category(class="form-select") }}
+        
+        <div class="col-md-6 mb-3">
+          <div class="card bg-dark text-white h-100 report-card">
+            <div class="card-header bg-warning">
+              <h5 class="card-title mb-0">Usuarios con préstamos activos</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Lista de usuarios que actualmente tienen libros prestados.</p>
+              <button class="btn btn-sm btn-outline-light report-btn">Generar Reporte</button>
+            </div>
+          </div>
         </div>
-        <div class="col-12">
-          {{ form.description.label(class="form-label") }}
-          {{ form.description(class="form-control", rows=2) }}
-        </div>
-        <div class="col-12 text-end">
-          <button type="button" id="btnCancel" class="btn btn-secondary me-2">Cancelar</button>
-          {{ form.submit(class="btn btn-custom") }}
+        
+        <div class="col-md-6 mb-3">
+          <div class="card bg-dark text-white h-100 report-card">
+            <div class="card-header bg-info">
+              <h5 class="card-title mb-0">Usuarios que más han realizado préstamos</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Ranking de usuarios con mayor cantidad de préstamos realizados.</p>
+              <button class="btn btn-sm btn-outline-light report-btn">Generar Reporte</button>
+            </div>
+          </div>
         </div>
       </div>
-    </form>
+
+      <!-- Tabla de libros para admin -->
+      <div class="card p-3 bg-dark border-0">
+        <div class="table-responsive">
+          <table id="booksTable" class="table table-dark table-striped mb-0">
+            <thead>
+              <tr>
+                <th class="text-white">ID</th>
+                <th class="text-white">Título</th>
+                <th class="text-white">Autor</th>
+                <th class="text-white">Categoría</th>
+                <th class="text-white">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if books %}
+                {% for b in books %}
+                <tr>
+                  <td class="text-white">{{ b.id }}</td>
+                  <td class="text-white">{{ b.title }}</td>
+                  <td class="text-white">{{ b.author }}</td>
+                  <td class="text-white">{{ b.category.name if b.category else '—' }}</td>
+                  <td>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-sm btn-warning edit-btn" onclick="editBook({ b.id })">
+                        <i class="bi bi-pencil"></i> Editar
+                      </button>
+                      <button class="btn btn-sm btn-danger delete-btn" onclick="confirmDelete({ b.id })">
+                        <i class="bi bi-trash"></i> Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-white">No se encontraron libros</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <!-- Grid de libros para visitantes/usuarios normales -->
+      <div id="booksContainer">
+        {% if books %}
+          <div class="row row-cols-1 row-cols-md-5 g-4" id="booksGrid">
+            {% for b in books[:5] %}
+            <div class="col">
+              <div class="card h-100 book-card">
+                <img src="{{ url_for('static', filename='img/libro.jpeg') }}" class="card-img-top book-cover" alt="Libro">
+                <div class="card-body">
+                  <h5 class="card-title text-white book-title">{{ b.title }}</h5>
+                  <p class="card-text text-white"><small>{{ b.author }}</small></p>
+                  <p class="card-text"><span class="badge bg-secondary">{{ b.category.name if b.category else 'Sin categoría' }}</span></p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          
+          <!-- Libros ocultos inicialmente -->
+          {% if books|length > 5 %}
+            <div class="row row-cols-1 row-cols-md-5 g-4 mt-2" id="moreBooks" style="display:none;">
+              {% for b in books[5:] %}
+              <div class="col">
+                <div class="card h-100 book-card">
+                  <img src="{{ url_for('static', filename='img/libro.jpeg') }}" class="card-img-top book-cover" alt="Libro">
+                  <div class="card-body">
+                    <h5 class="card-title text-white book-title">{{ b.title }}</h5>
+                    <p class="card-text"><small class="text-muted">{{ b.author }}</small></p>
+                    <p class="card-text"><span class="badge bg-secondary">{{ b.category.name if b.category else 'Sin categoría' }}</span></p>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <!-- Botón Ver más -->
+            <div class="text-center mt-4">
+              <button id="showMoreBtn" class="btn btn-primary btn-glow">Ver más libros</button>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="alert alert-info">No hay libros disponibles en este momento.</div>
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 
-  <!-- Tabla de libros -->
-  <div class="card p-4">
-    <table id="booksTable" class="table table-dark table-striped">
-      <thead>
-        <tr>
-          <th>ID</th><th>Título</th><th>Autor</th><th>Categoría</th><th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for b in books %}
-        <tr>
-          <td>{{ b.id }}</td>
-          <td>{{ b.title }}</td>
-          <td>{{ b.author }}</td>
-          <td>{{ b.category or '—' }}</td>
-          <td>
-            {% if role=='admin' %}
-              <button class="btn btn-sm btn-warning" onclick="editBook({{ b.id }})">✏️</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteBook({{ b.id }})">🗑️</button>
-            {% else %}
-              <span class="text-muted">—</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <!-- Modal para reportes -->
+  <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-white">
+        <!-- El contenido se genera dinámicamente -->
+      </div>
+    </div>
   </div>
 {% endblock %}
 
 {% block scripts %}
   {{ super() }}
   <script>
-    document.getElementById('btnAddNew')?.addEventListener('click',()=>{
-      document.getElementById('formContainer').style.display = 'block';
-      window.scrollTo({top:0,behavior:'smooth'});
+    // Variables globales
+    let currentAction = 'create'; // 'create' o 'edit'
+    let currentBookId = null;
+
+    // Elementos del DOM
+    const errorAlert = document.getElementById('errorAlert');
+    const formContainer = document.getElementById('formContainer');
+    const bookForm = document.getElementById('bookForm');
+    const btnAddNew = document.getElementById('btnAddNew');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const showMoreBtn = document.getElementById('showMoreBtn');
+    const moreBooks = document.getElementById('moreBooks');
+
+    // Mostrar error
+    function showError(message) {
+      errorAlert.textContent = message;
+      errorAlert.style.display = 'block';
+      setTimeout(() => { errorAlert.style.display = 'none'; }, 5000);
+    }
+
+    // Event Listeners
+    if (btnAddNew) {
+      btnAddNew.addEventListener('click', showCreateForm);
+    }
+
+    if (btnCancel) {
+      btnCancel.addEventListener('click', resetForm);
+    }
+
+    if (btnSubmit) {
+      btnSubmit.addEventListener('click', handleSubmit);
+    }
+
+    if (showMoreBtn) {
+      showMoreBtn.addEventListener('click', function() {
+        if (moreBooks) {
+          moreBooks.style.display = 'flex';
+          this.style.display = 'none';
+        }
+      });
+    }
+
+    // Cargar libros al iniciar (por si hay error en la carga inicial)
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificar si hay libros cargados
+      const booksContainer = document.getElementById('booksContainer');
+      if (booksContainer && booksContainer.children.length === 0) {
+        showError('Error al cargar los libros. Por favor intenta recargar la página.');
+      }
+
+      // Configurar botones de reportes si es admin
+      if (document.querySelector('.report-card')) {
+        setupReportButtons();
+      }
     });
-    document.getElementById('btnCancel')?.addEventListener('click',()=>{
-      document.getElementById('formContainer').style.display = 'none';
-      document.getElementById('bookForm').reset();
-      delete document.getElementById('bookForm').dataset.id;
-    });
+
+    // ==================== MANEJO DE REPORTES ====================
+    function setupReportButtons() {
+      const reportButtons = {
+        'Historial de préstamos de un usuario': generateUserLoansReport,
+        'Inventario actual de copias disponibles': generateInventoryReport,
+        'Usuarios con préstamos activos': generateActiveLoansReport,
+        'Usuarios que más han realizado préstamos': generateTopUsersReport
+      };
+
+      document.querySelectorAll('.report-card').forEach(card => {
+        const title = card.querySelector('.card-title').textContent.trim();
+        const button = card.querySelector('.report-btn');
+        
+        if (reportButtons[title]) {
+          button.addEventListener('click', reportButtons[title]);
+        }
+      });
+    }
+
+    // Generar reporte de historial de préstamos de usuario
+    async function generateUserLoansReport() {
+      try {
+        const users = await fetchUsers();
+        if (users.length === 0) {
+          showError('No se encontraron usuarios');
+          return;
+        }
+        
+        showUserSelectionModal(
+          users,
+          'Historial de préstamos por usuario',
+          generateUserLoansReportFinal
+        );
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'Error al generar el reporte');
+      }
+    }
+
+    async function generateUserLoansReportFinal(userId) {
+      try {
+        showLoading('Generando reporte...');
+        
+        // Generar y descargar reporte
+        downloadReport('user_loans', userId);
+        
+        // Opcional: Mostrar en pantalla también
+        const response = await fetch(`/api/reportes/historial-usuario/${userId}`);
+        if (!response.ok) throw new Error('Error al generar el reporte');
+        
+        const data = await response.json();
+        displayReportData(data, 'Historial de préstamos');
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'Error al generar el reporte');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Generar reporte de inventario
+    async function generateInventoryReport() {
+      try {
+        showLoading('Generando reporte de inventario...');
+        downloadReport('inventory');
+        
+        // Opcional: Mostrar datos también
+        const response = await fetch('/api/reportes/inventario');
+        if (!response.ok) throw new Error('Error al generar el reporte');
+        
+        const data = await response.json();
+        displayReportData(data, 'Inventario actual');
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'Error al generar el reporte');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Generar reporte de préstamos activos
+    async function generateActiveLoansReport() {
+      try {
+        showLoading('Generando reporte de préstamos activos...');
+        downloadReport('active_loans');
+        
+        const response = await fetch('/api/reportes/prestamos-activos');
+        if (!response.ok) throw new Error('Error al generar el reporte');
+        
+        const data = await response.json();
+        displayReportData(data, 'Préstamos activos');
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'Error al generar el reporte');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Generar reporte de top usuarios
+    async function generateTopUsersReport() {
+      try {
+        showLoading('Generando reporte de top usuarios...');
+        downloadReport('top_users');
+        
+        const response = await fetch('/api/reportes/top-usuarios');
+        if (!response.ok) throw new Error('Error al generar el reporte');
+        
+        const data = await response.json();
+        displayReportData(data, 'Top usuarios');
+      } catch (error) {
+        console.error('Error:', error);
+        showError(error.message || 'Error al generar el reporte');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar datos del reporte en un modal
+    function displayReportData(data, title) {
+      // Convertir datos a tabla HTML
+      let tableHtml = '';
+      
+      if (data.length > 0) {
+        // Crear encabezados de tabla
+        const headers = Object.keys(data[0]);
+        tableHtml += `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+        
+        // Crear filas de datos
+        const rows = data.map(item => 
+          `<tr>${headers.map(h => `<td>${item[h]}</td>`).join('')}</tr>`
+        ).join('');
+        tableHtml += `<tbody>${rows}</tbody>`;
+      } else {
+        tableHtml = '<div class="alert alert-info">No hay datos para mostrar</div>';
+      }
+      
+      const modalContent = `
+        <div class="modal-header">
+          <h5 class="modal-title">${title}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-striped">${tableHtml}</table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" onclick="downloadReport('${title.toLowerCase().replace(/\s+/g, '_')}')">
+            Descargar PDF
+          </button>
+        </div>
+      `;
+      
+      showModal(modalContent);
+    }
+
+    // Mostrar modal de selección de usuario
+    function showUserSelectionModal(users, title, callback) {
+      const options = users.map(user => 
+        `<option value="${user.id}">${user.ci} (Usuario #${user.id})</option>`
+      ).join('');
+      
+      const modalContent = `
+        <div class="modal-header">
+          <h5 class="modal-title">${title}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="userSelect" class="form-label">Seleccione un usuario:</label>
+            <select id="userSelect" class="form-select">
+              ${options}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="confirmUserSelection('${callback.name}')">
+            Generar Reporte
+          </button>
+        </div>
+      `;
+      
+      showModal(modalContent);
+    }
+
+    // Confirmar selección de usuario
+    function confirmUserSelection(callbackName) {
+      const select = document.getElementById('userSelect');
+      const userId = select.value;
+      
+      // Cerrar modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+      modal.hide();
+      
+      // Llamar a la función de callback con el ID seleccionado
+      window[callbackName](userId);
+    }
+
+    // Mostrar modal genérico
+    function showModal(content) {
+      const modal = document.getElementById('reportModal');
+      const modalContent = modal.querySelector('.modal-content');
+      
+      modalContent.innerHTML = content;
+      
+      // Inicializar modal de Bootstrap si está disponible
+      if (typeof bootstrap !== 'undefined') {
+        new bootstrap.Modal(modal).show();
+      } else {
+        // Fallback básico si Bootstrap no está disponible
+        modal.style.display = 'block';
+        modal.querySelector('.btn-close, .btn-secondary').onclick = () => {
+          modal.style.display = 'none';
+        };
+      }
+    }
+
+    // Descargar reporte en PDF
+    function downloadReport(reportType, userId = null) {
+      let url = `/api/reports/download/${reportType}`;
+      if (userId) {
+        url += `?user_id=${userId}`;
+      }
+      
+      // Abrir en nueva pestaña para descarga
+      window.open(url, '_blank');
+    }
+
+    // Obtener lista de usuarios
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/api/users');
+        if (!response.ok) throw new Error('Error al obtener usuarios');
+        return await response.json();
+      } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        alert('Error al cargar la lista de usuarios');
+        return [];
+      }
+    }
+
+    // Mostrar carga
+    function showLoading(message) {
+      const loadingDiv = document.getElementById('loadingIndicator') || document.createElement('div');
+      loadingDiv.id = 'loadingIndicator';
+      loadingDiv.innerHTML = `
+        <div class="loading-overlay">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p>${message}</p>
+        </div>
+      `;
+      loadingDiv.style.position = 'fixed';
+      loadingDiv.style.top = '0';
+      loadingDiv.style.left = '0';
+      loadingDiv.style.width = '100%';
+      loadingDiv.style.height = '100%';
+      loadingDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      loadingDiv.style.display = 'flex';
+      loadingDiv.style.justifyContent = 'center';
+      loadingDiv.style.alignItems = 'center';
+      loadingDiv.style.zIndex = '9999';
+      loadingDiv.style.color = 'white';
+      
+      if (!document.getElementById('loadingIndicator')) {
+        document.body.appendChild(loadingDiv);
+      }
+    }
+
+    // Ocultar carga
+    function hideLoading() {
+      const loadingDiv = document.getElementById('loadingIndicator');
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+    }
+
+    // Funciones para gestión de libros
+    function showCreateForm() {
+      currentAction = 'create';
+      bookForm.dataset.id = '';
+      bookForm.reset();
+      btnSubmit.textContent = 'Guardar';
+      formContainer.style.display = 'block';
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    async function editBook(id) {
+      try {
+        currentAction = 'edit';
+        currentBookId = id;
+        
+        const response = await fetch(`/api/libros/${id}`);
+        if (!response.ok) throw new Error('Error al cargar el libro');
+        
+        const book = await response.json();
+        
+        // Llenar formulario
+        bookForm.title.value = book.title;
+        bookForm.author.value = book.author;
+        bookForm.category.value = book.category_id || '';
+        bookForm.description.value = book.description || '';
+        bookForm.dataset.id = book.id;
+        
+        btnSubmit.textContent = 'Actualizar';
+        formContainer.style.display = 'block';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      } catch (error) {
+        console.error('Error al editar libro:', error);
+        showError(error.message || 'Error al cargar el libro para edición');
+      }
+    }
+
+    async function handleSubmit() {
+      try {
+        const formData = {
+          title: bookForm.title.value,
+          author: bookForm.author.value,
+          category_id: bookForm.category.value || null,
+          description: bookForm.description.value
+        };
+
+        let url = '/api/libros';
+        let method = 'POST';
+        
+        if (currentAction === 'edit' && currentBookId) {
+          url = `/api/libros/${currentBookId}`;
+          method = 'PUT';
+        }
+
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error al guardar');
+        }
+
+        const result = await response.json();
+        alert(result.mensaje);
+        resetForm();
+        window.location.reload(); // Recargar la página para ver cambios
+      } catch (error) {
+        console.error('Error al guardar libro:', error);
+        showError(error.message || 'Error al guardar el libro');
+      }
+    }
+
+    async function confirmDelete(id) {
+      if (!confirm('¿Estás seguro de que deseas eliminar este libro?')) return;
+      
+      try {
+        const response = await fetch(`/api/libros/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error al eliminar');
+        }
+
+        const result = await response.json();
+        alert(result.mensaje);
+        window.location.reload(); // Recargar la página para ver cambios
+      } catch (error) {
+        console.error('Error al eliminar libro:', error);
+        showError(error.message || 'Error al eliminar el libro');
+      }
+    }
+
+    function resetForm() {
+      bookForm.reset();
+      bookForm.dataset.id = '';
+      formContainer.style.display = 'none';
+      currentAction = 'create';
+      currentBookId = null;
+    }
   </script>
+
+  <style>
+    .card-img-top {
+      height: 200px;
+      object-fit: cover;
+      transition: all 0.3s ease;
+    }
+    
+    .book-card {
+      background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .book-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .book-card:hover .book-cover {
+      transform: scale(1.05);
+    }
+    
+    .book-title {
+      font-family: 'Georgia', serif;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .book-card:hover .book-title {
+      color: #f8f9fa !important;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+    }
+    
+    .btn-glow {
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-glow:hover {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+    
+    #errorAlert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 400px;
+      border-radius: 10px;
+    }
+    
+    .form-label.text-white,
+    .text-white {
+      color: white !important;
+    }
+    
+    .card-form {
+      background: rgba(40, 40, 40, 0.9);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .table-dark {
+      background-color: #1a1a1a;
+    }
+    
+    .table-dark th,
+    .table-dark td {
+      border-color: #333;
+    }
+    
+    /* Ajustes específicos para la tabla de admin */
+    .card.table-container {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    .table-responsive {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    #booksTable {
+      margin-top: 0 !important;
+    }
+
+    #booksTable th {
+      border-top: none;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+
+    /* Estilos para los cards de reportes */
+    .card-header {
+      font-weight: bold;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .report-card {
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .report-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Estilos para el modal de reportes */
+    .modal-content.bg-dark {
+      background-color: #1a1a1a !important;
+      border: 1px solid #444;
+    }
+
+    .modal-content .table {
+      color: white;
+    }
+
+    .modal-content .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Estilos para el loading */
+    .loading-overlay {
+      text-align: center;
+    }
+
+    .loading-overlay p {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+    }
+  </style>
 {% endblock %}
