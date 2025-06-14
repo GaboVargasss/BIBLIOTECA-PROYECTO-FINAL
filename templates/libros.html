@@ -140,39 +140,207 @@
       </div>
     {% else %}
       <!-- Grid de libros para visitantes/usuarios normales -->
-      <div id="booksContainer">
-        {% if books %}
-          <div class="row row-cols-1 row-cols-md-5 g-4" id="booksGrid">
-            {% for b in books[:5] %}
-            <div class="col">
-              <div class="card h-100 book-card">
-                <img src="{{ url_for('static', filename='img/libro.jpeg') }}" class="card-img-top book-cover" alt="Libro">
-                <div class="card-body">
-                  <h5 class="card-title text-white book-title">{{ b.title }}</h5>
-                  <p class="card-text text-white"><small>{{ b.author }}</small></p>
-                  <p class="card-text"><span class="badge bg-secondary">{{ b.category.name if b.category else 'Sin categoría' }}</span></p>
-                </div>
-              </div>
-            </div>
-            {% endfor %}
+<div id="booksContainer">
+  {% if books %}
+    <div class="row row-cols-1 row-cols-md-5 g-4" id="booksGrid">
+      {% for b in books[:5] %}
+      <div class="col">
+        <div class="card h-100 book-card">
+          {% if b.title == "La Casa de los Espíritus" %}
+            <img src="https://th.bing.com/th/id/R.54d54b9e47b368c2dcbf822968528a1d?rik=ZWfmTXb8pPqdxw&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Casa de los Espíritus">
+          {% elif b.title == "Cien Años de Soledad" %}
+            <img src="https://th.bing.com/th/id/R.938c16d580f65d466de44d9f2ec98732?rik=kqLcyYNhyB9XcQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Cien Años de Soledad">
+          {% elif b.title == "Don Quijote de la Mancha" %}
+            <img src="https://th.bing.com/th/id/OIP.p2Qht0iMCaSgQb3wbzHukAHaKN?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="Don Quijote de la Mancha">
+          {% elif b.title == "El Amor en los Tiempos del Cólera" %}
+            <img src="https://th.bing.com/th/id/OIP.AH51t3XXwwUHzBcgAnRyDQHaLY?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="El Amor en los Tiempos del Cólera">
+          {% elif b.title == "Pedro Páramo" %}
+            <img src="https://th.bing.com/th/id/OIP._idAd91_g_NrtKCHOU3NpQAAAA?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="Pedro Páramo">
+          {% elif b.title == "Rayuela" %}
+            <img src="https://th.bing.com/th/id/R.84d2ad6787f0eab3d2c35097777f1d41?rik=s5tX1clebD77gQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Rayuela">
+          {% elif b.title == "La Ciudad y los Perros" %}
+            <img src="https://th.bing.com/th/id/R.938c16d580f65d466de44d9f2ec98732?rik=kqLcyYNhyB9XcQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Ciudad y los Perros">
+          {% elif b.title == "La Fiesta del Chivo" %}
+            <img src="https://th.bing.com/th/id/R.1a5cfca15ff39f234282eb119fd9ee84?rik=iT5fIgNSMrqgdg&riu=http%3a%2f%2f2.bp.blogspot.com%2f-dGgVbVjfd3I%2fWLic0sp9tLI%2fAAAAAAAAHuU%2f3fzfr5883Gs068ZRNGl1HbwRk198uN-IgCK4B%2fs1600%2fla-fiesta-del-chivo.jpg&ehk=J5PI%2fAphwc7z%2bN2XE6bu7oFVw26fCYscXfZRfE1vNN8%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Fiesta del Chivo">
+          {% elif b.title == "Crimen y Castigo" %}
+            <img src="https://assets-global.website-files.com/6034d7d1f3e0f52c50b2adee/6254541d8ae4df16d4e69bc8_6034d7d1f3e0f54529b2b1a1_Crimen-y-castigo-fiodor-dostoyevski-editorial-alma.jpeg" class="card-img-top book-cover" alt="Crimen y Castigo">
+          {% elif b.title == "Madame Bovary" %}
+            <img src="https://th.bing.com/th/id/R.bfae76717b0269eeb79b473202a0c47f?rik=AD6SgLhBk9YufA&riu=http%3a%2f%2f2.bp.blogspot.com%2f-dZTo7vFU5ow%2fVgBoP_cpkgI%2fAAAAAAAAE2g%2fF1BlE189YuQ%2fs1600%2fmadame-bovary.jpg&ehk=JPl4eHVX08x5Tgr%2ffPp4KgNO6vMPfdcJhYyUKwXO%2bhw%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Madame Bovary">
+          {% elif b.title == "La Metamorfosis" %}
+            <img src="https://th.bing.com/th/id/OIP.i7Co-_uepnqacgo9X7Lp2wHaMI?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="La Metamorfosis">
+          {% elif b.title == "El Nombre de la Rosa" %}
+            <img src="https://pics.filmaffinity.com/El_nombre_de_la_rosa-932325619-large.jpg" class="card-img-top book-cover" alt="El Nombre de la Rosa">
+          {% elif b.title == "Las Mil y Una Noches" %}
+            <img src="https://th.bing.com/th/id/OIP.c6lMjK5WW7B5coR9RDHUEwHaJ9?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="Las Mil y Una Noches">
+          {% elif b.title == "El Señor de los Anillos: La Comunidad del Anillo" %}
+            <img src="https://th.bing.com/th/id/OIP.vVvlRPaIUFhjugjPJmjiFQHaLF?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="El Señor de los Anillos: La Comunidad del Anillo">
+          {% elif b.title == "El Hobbit" %}
+            <img src="https://www.estudioenescarlata.com/media/img/portadas/_visd_0001JPG01O5Z.jpg" class="card-img-top book-cover" alt="El Hobbit">
+          {% elif b.title == "1984" %}
+            <img src="https://m.media-amazon.com/images/I/71kxa1-0mfL.jpg" class="card-img-top book-cover" alt="1984">
+          {% elif b.title == "El túnel" %}
+            <img src="https://porqueleer.es/wp-content/uploads/2023/06/El-tunel.jpg" class="card-img-top book-cover" alt="El túnel">
+          {% elif b.title == "Ficciones" %}
+            <img src="https://th.bing.com/th/id/R.f7836a820665a332a8b3abcc418f446c?rik=Jnu3ZckPOR9Opw&riu=http%3a%2f%2f1.bp.blogspot.com%2f-2V-Ej-Q5Vr4%2fVah77WezXTI%2fAAAAAAAAHdE%2f6jAuqM30438%2fs1600%2flibro_1362275865.jpg&ehk=tLBcZ1PTMEJML3tu7O%2f5VSyCfwRm9YIqG0bX%2bwW625g%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Ficciones">
+          {% elif b.title == "El principito" %}
+            <img src="https://th.bing.com/th/id/OIP.Jm3Yn4t7jbAfL2fXF6TUkwHaLX?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El principito">
+          {% elif b.title == "Orgullo y Prejuicio" %}
+            <img src="https://th.bing.com/th/id/R.c71f4e8aec2d03b0ad7834c89846b50d?rik=yr9NbChLTGEzsA&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Orgullo y Prejuicio">
+          {% elif b.title == "La comunidad del anillo" %}
+            <img src="https://th.bing.com/th/id/R.d60f3156fb891e7a61332ffa0d60c8d2?rik=bSqunlRYGoTimA&riu=http%3a%2f%2f4.bp.blogspot.com%2f-fwBFcc__Igk%2fU4YwkJlz71I%2fAAAAAAAACeA%2fn7nvHR3X1xM%2fs1600%2fLa%2bcomunidad%2bdel%2banillo.jpg&ehk=QZSSga710J%2f3i8PkBSJmpLO%2bcTxeZCkdTIGiTrIKTB4%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La comunidad del anillo">
+          {% elif b.title == "Fahrenheit 451" %}
+            <img src="https://4.bp.blogspot.com/-1SXcY6CyiSw/WMgz8y01BKI/AAAAAAAAT-o/amOlCA24jMgSJuV8bCQueeWRv-7J5JDuACLcB/s1600/ray-bradbury-fahrenheit-451-libro-portada.jpg" class="card-img-top book-cover" alt="Fahrenheit 451">
+          {% elif b.title == "El Aleph" %}
+            <img src="https://th.bing.com/th/id/OIP.bJE2g7_HVFBc403Q7CiF7QHaLT?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El Aleph">
+          {% elif b.title == "La sombra del Viento" %}
+            <img src="https://th.bing.com/th/id/R.9e164e1d45e52e0884b899450f2bd7d9?rik=Pgqo3wVlZhS%2bBw&riu=http%3a%2f%2f4.bp.blogspot.com%2f-BXXT1uAS9uE%2fU_i2i5W0t6I%2fAAAAAAAAAQ4%2frN2dhlUKFAo%2fs1600%2fla_sombra_del_viento.jpg&ehk=L1nhtFEb4MG7GeI0yjCcVqvbzVcqxVHDzC12QcFz3Mc%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La sombra del Viento">
+          {% elif b.title == "Ensayo sobre la ceguera" %}
+            <img src="https://th.bing.com/th/id/OIP.Hes3G_5KdnUScIC2yjU34QHaJ4?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="Ensayo sobre la ceguera">
+          {% elif b.title == "La colmena" %}
+            <img src="https://th.bing.com/th/id/OIP.OUS6-YvqEDuNCJphpI_HTwHaMR?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="La colmena">
+          {% elif b.title == "La Tregua" %}
+            <img src="https://th.bing.com/th/id/R.8f9365979c66a517c64a8a1a80816cf8?rik=LMFprrD2%2btmgWQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Tregua">
+          {% elif b.title == "Conversacion en la catedral" %}
+            <img src="https://th.bing.com/th/id/R.6de08f65576e8fcafa6a4d59b56aa5db?rik=EV48Kt%2fH8P2KVA&riu=http%3a%2f%2flabodeteca.com%2fweb%2fwp-content%2fuploads%2f2015%2f01%2fportada-conversacion-catedral_grande-1.jpg&ehk=jKqPrdrb8F0J3IcvtOz7V%2fVr6HWgnoekzfxoylNl51Y%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Conversacion en la catedral">
+          {% elif b.title == "La guerra del fin del mundo" %}
+            <img src="https://th.bing.com/th/id/OIP.pfHWLHLxQJQZE_neR0tySAHaKg?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="La guerra del fin del mundo">
+          {% elif b.title == "El coronel no tiene quien le escriba" %}
+            <img src="https://th.bing.com/th/id/OIP.dPQy9Ubmq9md5IOz-PwlrwHaLu?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El coronel no tiene quien le escriba">
+          {% elif b.title == "La muerte de artemio cruz" %}
+            <img src="https://i.pinimg.com/736x/6d/54/c4/6d54c46422ca0c5adbbbaeb8b5b60e2b--read-books.jpg" class="card-img-top book-cover" alt="La muerte de artemio cruz">
+          {% elif b.title == "El amor, las mujeres y la vida" %}
+            <img src="https://th.bing.com/th/id/R.aca11529d81257e17181b032307e8db3?rik=1BdxUKnkTtx4cw&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="El amor, las mujeres y la vida">
+          {% elif b.title == "Travesuras de la niña maria" %}
+            <img src="https://m.media-amazon.com/images/I/81jwoP+udnL._SL1500_.jpg" class="card-img-top book-cover" alt="Travesuras de la niña maria">
+          {% elif b.title == "el peregrino" %}
+            <img src="https://th.bing.com/th/id/OIP.AcJhs4ChgdjnPK7ojqdOdQAAAA?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="el peregrino">
+          {% elif b.title == "la carretera" %}
+            <img src="https://th.bing.com/th/id/OIP.f6C5XKO19yRW-2WhxWcXfwHaLQ?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="la carretera">
+          {% elif b.title == "El gran Gatsby" %}
+            <img src="https://www.capsulasliterarias.com/wp-content/uploads/2023/05/Resumen-de-El-Gran-Gatsby-Francis-Scott-Fitzgerald-200x300.png" class="card-img-top book-cover" alt="El gran Gatsby">
+          {% elif b.title == "el diario de ana frank" %}
+            <img src="https://th.bing.com/th/id/OIP.8b0n4McpzaDbA9M6QIgMngHaLQ?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="el diario de ana frank">
+          {% elif b.title == "Moby dick" %}
+            <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1605824499i/55953683.jpg" class="card-img-top book-cover" alt="Moby dick">
+          {% elif b.title == "la isla del tesoro" %}
+            <img src="https://th.bing.com/th/id/R.7a7d981b68e54c5a23f59320c0314487?rik=uVTkYqqMMBeTEw&riu=http%3a%2f%2f2.bp.blogspot.com%2f-E1aRK4wKQ-I%2fVpeLb13mnoI%2fAAAAAAABrZc%2fOkI1FoRr4b0%2fs1600%2flaisladeltesoro.jpg&ehk=6dpOvT1uaORgOItT9y%2f0m5qYPo9prYdkoTMt7HB8sys%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="la isla del tesoro">
+          {% elif b.title == "Dracula" %}
+            <img src="https://th.bing.com/th/id/R.bc631c7e08b2a977de44d053f5fc250c?rik=rHHwWzWoy1VDCw&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Dracula">
+          {% elif b.title == "El retrato de Dorian Gray" %}
+            <img src="https://th.bing.com/th/id/OIP.ZUx5oNHHuuSb12d77_ZfiAHaLu?r=0&o=7rm=3&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El retrato de Dorian Gray">
+          {% else %}
+            <img src="{{ url_for('static', filename='img/libro.jpeg') }}" class="card-img-top book-cover" alt="Libro">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title text-white book-title">{{ b.title }}</h5>
+            <p class="card-text text-white"><small>{{ b.author }}</small></p>
+            <p class="card-text"><span class="badge bg-secondary">{{ b.category.name if b.category else 'Sin categoría' }}</span></p>
           </div>
-          
-          <!-- Libros ocultos inicialmente -->
-          {% if books|length > 5 %}
-            <div class="row row-cols-1 row-cols-md-5 g-4 mt-2" id="moreBooks" style="display:none;">
-              {% for b in books[5:] %}
-              <div class="col">
-                <div class="card h-100 book-card">
-                  <img src="{{ url_for('static', filename='img/libro.jpeg') }}" class="card-img-top book-cover" alt="Libro">
-                  <div class="card-body">
-                    <h5 class="card-title text-white book-title">{{ b.title }}</h5>
-                    <p class="card-text"><small class="text-muted">{{ b.author }}</small></p>
-                    <p class="card-text"><span class="badge bg-secondary">{{ b.category.name if b.category else 'Sin categoría' }}</span></p>
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Libros ocultos inicialmente -->
+    {% if books|length > 5 %}
+      <div class="row row-cols-1 row-cols-md-5 g-4 mt-2" id="moreBooks" style="display:none;">
+        {% for b in books[5:] %}
+        <div class="col">
+          <div class="card h-100 book-card">
+            {% if b.title == "La Casa de los Espíritus" %}
+              <img src="https://th.bing.com/th/id/R.54d54b9e47b368c2dcbf822968528a1d?rik=ZWfmTXb8pPqdxw&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Casa de los Espíritus">
+            {% elif b.title == "Cien Años de Soledad" %}
+              <img src="https://th.bing.com/th/id/R.938c16d580f65d466de44d9f2ec98732?rik=kqLcyYNhyB9XcQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Cien Años de Soledad">
+            {% elif b.title == "Don Quijote de la Mancha" %}
+              <img src="https://th.bing.com/th/id/OIP.p2Qht0iMCaSgQb3wbzHukAHaKN?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="Don Quijote de la Mancha">
+            {% elif b.title == "El Amor en los Tiempos del Cólera" %}
+              <img src="https://th.bing.com/th/id/OIP.AH51t3XXwwUHzBcgAnRyDQHaLY?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="El Amor en los Tiempos del Cólera">
+            {% elif b.title == "Pedro Páramo" %}
+              <img src="https://th.bing.com/th/id/OIP._idAd91_g_NrtKCHOU3NpQAAAA?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="Pedro Páramo">
+            {% elif b.title == "Rayuela" %}
+              <img src="https://th.bing.com/th/id/R.84d2ad6787f0eab3d2c35097777f1d41?rik=s5tX1clebD77gQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Rayuela">
+            {% elif b.title == "La Ciudad y los Perros" %}
+              <img src="https://th.bing.com/th/id/R.938c16d580f65d466de44d9f2ec98732?rik=kqLcyYNhyB9XcQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Ciudad y los Perros">
+            {% elif b.title == "La Fiesta del Chivo" %}
+              <img src="https://th.bing.com/th/id/R.1a5cfca15ff39f234282eb119fd9ee84?rik=iT5fIgNSMrqgdg&riu=http%3a%2f%2f2.bp.blogspot.com%2f-dGgVbVjfd3I%2fWLic0sp9tLI%2fAAAAAAAAHuU%2f3fzfr5883Gs068ZRNGl1HbwRk198uN-IgCK4B%2fs1600%2fla-fiesta-del-chivo.jpg&ehk=J5PI%2fAphwc7z%2bN2XE6bu7oFVw26fCYscXfZRfE1vNN8%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Fiesta del Chivo">
+            {% elif b.title == "Crimen y Castigo" %}
+              <img src="https://assets-global.website-files.com/6034d7d1f3e0f52c50b2adee/6254541d8ae4df16d4e69bc8_6034d7d1f3e0f54529b2b1a1_Crimen-y-castigo-fiodor-dostoyevski-editorial-alma.jpeg" class="card-img-top book-cover" alt="Crimen y Castigo">
+            {% elif b.title == "Madame Bovary" %}
+              <img src="https://th.bing.com/th/id/R.bfae76717b0269eeb79b473202a0c47f?rik=AD6SgLhBk9YufA&riu=http%3a%2f%2f2.bp.blogspot.com%2f-dZTo7vFU5ow%2fVgBoP_cpkgI%2fAAAAAAAAE2g%2fF1BlE189YuQ%2fs1600%2fmadame-bovary.jpg&ehk=JPl4eHVX08x5Tgr%2ffPp4KgNO6vMPfdcJhYyUKwXO%2bhw%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Madame Bovary">
+            {% elif b.title == "La Metamorfosis" %}
+              <img src="https://th.bing.com/th/id/OIP.i7Co-_uepnqacgo9X7Lp2wHaMI?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="La Metamorfosis">
+            {% elif b.title == "El Nombre de la Rosa" %}
+              <img src="https://pics.filmaffinity.com/El_nombre_de_la_rosa-932325619-large.jpg" class="card-img-top book-cover" alt="El Nombre de la Rosa">
+            {% elif b.title == "Las Mil y Una Noches" %}
+              <img src="https://th.bing.com/th/id/OIP.c6lMjK5WW7B5coR9RDHUEwHaJ9?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="Las Mil y Una Noches">
+            {% elif b.title == "El Señor de los Anillos: La Comunidad del Anillo" %}
+              <img src="https://th.bing.com/th/id/OIP.vVvlRPaIUFhjugjPJmjiFQHaLF?rs=1&pid=ImgDetMain" class="card-img-top book-cover" alt="El Señor de los Anillos: La Comunidad del Anillo">
+            {% elif b.title == "El Hobbit" %}
+              <img src="https://www.estudioenescarlata.com/media/img/portadas/_visd_0001JPG01O5Z.jpg" class="card-img-top book-cover" alt="El Hobbit">
+            {% elif b.title == "1984" %}
+              <img src="https://m.media-amazon.com/images/I/71kxa1-0mfL.jpg" class="card-img-top book-cover" alt="1984">
+            {% elif b.title == "El Túnel" %}
+              <img src="https://porqueleer.es/wp-content/uploads/2023/06/El-tunel.jpg" class="card-img-top book-cover" alt="El túnel">
+            {% elif b.title == "Ficciones" %}
+              <img src="https://th.bing.com/th/id/R.f7836a820665a332a8b3abcc418f446c?rik=Jnu3ZckPOR9Opw&riu=http%3a%2f%2f1.bp.blogspot.com%2f-2V-Ej-Q5Vr4%2fVah77WezXTI%2fAAAAAAAAHdE%2f6jAuqM30438%2fs1600%2flibro_1362275865.jpg&ehk=tLBcZ1PTMEJML3tu7O%2f5VSyCfwRm9YIqG0bX%2bwW625g%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Ficciones">
+            {% elif b.title == "El Principito" %}
+              <img src="https://th.bing.com/th/id/OIP.Jm3Yn4t7jbAfL2fXF6TUkwHaLX?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El principito">
+            {% elif b.title == "Orgullo y Prejuicio" %}
+              <img src="https://th.bing.com/th/id/R.c71f4e8aec2d03b0ad7834c89846b50d?rik=yr9NbChLTGEzsA&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Orgullo y Prejuicio">
+            {% elif b.title == "La Comunidad del Anillo" %}
+              <img src="https://th.bing.com/th/id/R.d60f3156fb891e7a61332ffa0d60c8d2?rik=bSqunlRYGoTimA&riu=http%3a%2f%2f4.bp.blogspot.com%2f-fwBFcc__Igk%2fU4YwkJlz71I%2fAAAAAAAACeA%2fn7nvHR3X1xM%2fs1600%2fLa%2bcomunidad%2bdel%2banillo.jpg&ehk=QZSSga710J%2f3i8PkBSJmpLO%2bcTxeZCkdTIGiTrIKTB4%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La comunidad del anillo">
+            {% elif b.title == "Fahrenheit 451" %}
+              <img src="https://4.bp.blogspot.com/-1SXcY6CyiSw/WMgz8y01BKI/AAAAAAAAT-o/amOlCA24jMgSJuV8bCQueeWRv-7J5JDuACLcB/s1600/ray-bradbury-fahrenheit-451-libro-portada.jpg" class="card-img-top book-cover" alt="Fahrenheit 451">
+            {% elif b.title == "El Aleph" %}
+              <img src="https://th.bing.com/th/id/OIP.bJE2g7_HVFBc403Q7CiF7QHaLT?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El Aleph">
+            {% elif b.title == "La Sombra del Viento" %}
+              <img src="https://th.bing.com/th/id/R.9e164e1d45e52e0884b899450f2bd7d9?rik=Pgqo3wVlZhS%2bBw&riu=http%3a%2f%2f4.bp.blogspot.com%2f-BXXT1uAS9uE%2fU_i2i5W0t6I%2fAAAAAAAAAQ4%2frN2dhlUKFAo%2fs1600%2fla_sombra_del_viento.jpg&ehk=L1nhtFEb4MG7GeI0yjCcVqvbzVcqxVHDzC12QcFz3Mc%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La sombra del Viento">
+            {% elif b.title == "Ensayo sobre la Ceguera" %}
+              <img src="https://th.bing.com/th/id/OIP.Hes3G_5KdnUScIC2yjU34QHaJ4?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="Ensayo sobre la ceguera">
+            {% elif b.title == "La Colmena" %}
+              <img src="https://th.bing.com/th/id/OIP.OUS6-YvqEDuNCJphpI_HTwHaMR?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="La colmena">
+            {% elif b.title == "La Tregua" %}
+              <img src="https://th.bing.com/th/id/R.8f9365979c66a517c64a8a1a80816cf8?rik=LMFprrD2%2btmgWQ&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="La Tregua">
+            {% elif b.title == "Conversación en La Catedral" %}
+              <img src="https://th.bing.com/th/id/R.6de08f65576e8fcafa6a4d59b56aa5db?rik=EV48Kt%2fH8P2KVA&riu=http%3a%2f%2flabodeteca.com%2fweb%2fwp-content%2fuploads%2f2015%2f01%2fportada-conversacion-catedral_grande-1.jpg&ehk=jKqPrdrb8F0J3IcvtOz7V%2fVr6HWgnoekzfxoylNl51Y%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Conversacion en la catedral">
+            {% elif b.title == "La Guerra del Fin del Mundo" %}
+              <img src="https://th.bing.com/th/id/OIP.pfHWLHLxQJQZE_neR0tySAHaKg?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="La guerra del fin del mundo">
+            {% elif b.title == "El Coronel no Tiene Quien le Escriba" %}
+              <img src="https://th.bing.com/th/id/OIP.dPQy9Ubmq9md5IOz-PwlrwHaLu?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El coronel no tiene quien le escriba">
+            {% elif b.title == "La Muerte de Artemio Cruz" %}
+              <img src="https://i.pinimg.com/736x/6d/54/c4/6d54c46422ca0c5adbbbaeb8b5b60e2b--read-books.jpg" class="card-img-top book-cover" alt="La muerte de artemio cruz">
+            {% elif b.title == "El Amor, las Mujeres y la Vida" %}
+              <img src="https://th.bing.com/th/id/R.aca11529d81257e17181b032307e8db3?rik=1BdxUKnkTtx4cw&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="El amor, las mujeres y la vida">
+            {% elif b.title == "Travesuras de la Niña Mala" %}
+              <img src="https://m.media-amazon.com/images/I/81jwoP+udnL._SL1500_.jpg" class="card-img-top book-cover" alt="Travesuras de la niña maria">
+            {% elif b.title == "El Peregrino" %}
+              <img src="https://th.bing.com/th/id/OIP.AcJhs4ChgdjnPK7ojqdOdQAAAA?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="el peregrino">
+            {% elif b.title == "La Carretera" %}
+              <img src="https://th.bing.com/th/id/OIP.f6C5XKO19yRW-2WhxWcXfwHaLQ?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="la carretera">
+            {% elif b.title == "El Gran Gatsby" %}
+              <img src="https://www.capsulasliterarias.com/wp-content/uploads/2023/05/Resumen-de-El-Gran-Gatsby-Francis-Scott-Fitzgerald-200x300.png" class="card-img-top book-cover" alt="El gran Gatsby">
+            {% elif b.title == "El Diario de Ana Frank" %}
+              <img src="https://th.bing.com/th/id/OIP.8b0n4McpzaDbA9M6QIgMngHaLQ?r=0&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="el diario de ana frank">
+            {% elif b.title == "Moby-Dick" %}
+              <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1605824499i/55953683.jpg" class="card-img-top book-cover" alt="Moby dick">
+            {% elif b.title == "La Isla del Tesoro" %}
+              <img src="https://th.bing.com/th/id/R.7a7d981b68e54c5a23f59320c0314487?rik=uVTkYqqMMBeTEw&riu=http%3a%2f%2f2.bp.blogspot.com%2f-E1aRK4wKQ-I%2fVpeLb13mnoI%2fAAAAAAABrZc%2fOkI1FoRr4b0%2fs1600%2flaisladeltesoro.jpg&ehk=6dpOvT1uaORgOItT9y%2f0m5qYPo9prYdkoTMt7HB8sys%3d&risl=&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="la isla del tesoro">
+            {% elif b.title == "Drácula" %}
+              <img src="https://th.bing.com/th/id/R.bc631c7e08b2a977de44d053f5fc250c?rik=rHHwWzWoy1VDCw&pid=ImgRaw&r=0" class="card-img-top book-cover" alt="Dracula">
+            {% elif b.title == "El Retrato de Dorian Gray" %}
+              <img src="https://th.bing.com/th/id/OIP.ZUx5oNHHuuSb12d77_ZfiAHaLu?r=0&o=7rm=3&rs=1&pid=ImgDetMain&cb=idpwebpc1" class="card-img-top book-cover" alt="El retrato de Dorian Gray">
+            {% else %}
+              <img src="{{ url_for('static', filename='img/libro.jpeg') }}" class="card-img-top book-cover" alt="Libro">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title text-white book-title">{{ b.title }}</h5>
+              <p class="card-text"><small class="text-muted">{{ b.author }}</small></p>
+              <p class="card-text"><span class="badge bg-secondary">{{ b.category.name if b.category else 'Sin categoría' }}</span></p>
             </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
 
             <!-- Botón Ver más -->
             <div class="text-center mt-4">
@@ -647,140 +815,104 @@
   </script>
 
   <style>
+    /* Estilo base mejorado */
     .card-img-top {
       height: 200px;
-      object-fit: cover;
+      object-fit: contain;
       transition: all 0.3s ease;
+      filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
     }
     
     .book-card {
-      background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
-      border: none;
+      background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+      border: 1px solid #2a2a2a;
       border-radius: 15px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
       transition: all 0.3s ease;
       overflow: hidden;
+      position: relative;
     }
     
+    /* Efecto mágico al pasar el mouse */
     .book-card:hover {
       transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 25px rgba(255, 215, 0, 0.2);
+      border-color: #5d4a21;
     }
     
+    /* Textos blancos */
+    .book-card .card-title,
+    .book-card .card-text,
+    .book-card small {
+      color: white !important;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    
+    /* Estilo específico para autores */
+    .book-card .card-text small {
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 0.9rem;
+      color: #f8f9fa !important;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Título estilo pergamino */
+    .book-title {
+      font-family: 'Cinzel Decorative', 'Georgia', serif;
+      font-weight: bold;
+      color: #f8f9fa !important;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+      position: relative;
+      padding-bottom: 5px;
+    }
+    
+    .book-title:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 25%;
+      width: 50%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #ffd700, transparent);
+    }
+    
+    /* Efecto hover en la portada */
     .book-card:hover .book-cover {
       transform: scale(1.05);
+      filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
     }
     
-    .book-title {
-      font-family: 'Georgia', serif;
-      font-weight: bold;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-      transition: all 0.3s ease;
+    /* Badge de categoría estilo Hogwarts */
+    .book-card .badge.bg-secondary {
+      background-color: #5d4a21 !important;
+      color: #ffd700 !important;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      border: 1px solid #ffd70033;
     }
     
-    .book-card:hover .book-title {
-      color: #f8f9fa !important;
-      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-    }
-    
-    .btn-glow {
-      transition: all 0.3s ease;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    }
-    
-    .btn-glow:hover {
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    }
-    
-    #errorAlert {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-      max-width: 400px;
-      border-radius: 10px;
-    }
-    
-    .form-label.text-white,
-    .text-white {
-      color: white !important;
-    }
-    
-    .card-form {
-      background: rgba(40, 40, 40, 0.9);
-      padding: 25px;
+    /* Fondo con textura de pergamino */
+    .books-container {
+      background-image: url('https://www.transparenttextures.com/patterns/black-paper.png');
+      padding: 2rem;
       border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
     }
     
-    .table-dark {
-      background-color: #1a1a1a;
+    /* Efecto de luz dorada al pasar el mouse */
+    .book-card:hover:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+      pointer-events: none;
     }
     
-    .table-dark th,
-    .table-dark td {
-      border-color: #333;
-    }
-    
-    /* Ajustes específicos para la tabla de admin */
-    .card.table-container {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-
-    .table-responsive {
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    #booksTable {
-      margin-top: 0 !important;
-    }
-
-    #booksTable th {
-      border-top: none;
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-    }
-
-    /* Estilos para los cards de reportes */
-    .card-header {
-      font-weight: bold;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .report-card {
-      transition: transform 0.3s ease;
-      cursor: pointer;
-    }
-
-    .report-card:hover {
-      transform: translateY(-5px);
-    }
-
-    /* Estilos para el modal de reportes */
-    .modal-content.bg-dark {
-      background-color: #1a1a1a !important;
-      border: 1px solid #444;
-    }
-
-    .modal-content .table {
-      color: white;
-    }
-
-    .modal-content .table-striped tbody tr:nth-of-type(odd) {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    /* Estilos para el loading */
-    .loading-overlay {
-      text-align: center;
-    }
-
-    .loading-overlay p {
-      margin-top: 1rem;
-      font-size: 1.2rem;
-    }
-  </style>
+    /* Tipografía Harry Potter */
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;700&display=swap');
+</style>
 {% endblock %}

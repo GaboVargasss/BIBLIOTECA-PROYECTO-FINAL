@@ -29,6 +29,7 @@ class Book(db.Model):
     author      = db.Column(db.String(128), nullable=False)
     description = db.Column(db.Text, nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    
 
     def to_dict(self):
         return {

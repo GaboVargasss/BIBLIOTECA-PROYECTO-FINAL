@@ -239,7 +239,7 @@ def obtener_opciones_libros():
 def obtener_libros():
     """Obtiene todos los libros (con filtros opcionales)"""
     try:
-        query = Book.query
+        query = Book.query.options(db.joinedload(Book.category))  # Carga la relación
         
         # Filtros
         if request.args.get('autor'):
@@ -254,6 +254,7 @@ def obtener_libros():
             "title": libro.title,
             "author": libro.author,
             "description": libro.description,
+            "category": libro.category.name if libro.category else "Sin categoría",  # Cambio clave aquí
             "category_id": libro.category_id
         } for libro in libros])
         
@@ -265,17 +266,20 @@ def obtener_libros():
 def obtener_libro(id):
     """Obtiene un libro específico por ID"""
     try:
-        libro = Book.query.get_or_404(id)
+        libro = Book.query.options(db.joinedload(Book.category)).get_or_404(id)
         return jsonify({
             "id": libro.id,
             "title": libro.title,
             "author": libro.author,
             "description": libro.description,
-            "category_id": libro.category_id
+            "category_id": libro.category_id,
+            "category": {
+                "id": libro.category.id,
+                "name": libro.category.name
+            } if libro.category else None
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 404
-
 @app.route('/api/libros', methods=['POST'])
 @login_required
 def crear_libro():
@@ -655,7 +659,33 @@ def download_report(report_type):
                  p.estado]
                 for p in data
             ]
+        elif report_type == 'inventory':
+            data = db.session.query(
+                Libro.id_libro,
+                Libro.titulo_libro,
+                Libro.idioma,
+                func.string_agg(Genero.nombre_genero, ', ').label('generos'),
+                func.sum(Copia.copias_disponibles).label('copias_disponibles')
+            ).join(
+                LibroGenero, Libro.id_libro == LibroGenero.id_libro
+            ).join(
+                Genero, LibroGenero.id_genero == Genero.id_genero
+            ).join(
+                Edicion, Libro.id_libro == Edicion.id_libro
+            ).join(
+                Copia, Edicion.id_edicion == Copia.id_edicion
+            ).group_by(
+                Libro.id_libro
+            ).order_by(
+                Libro.titulo_libro
+            ).all()
             
+            title = "Inventario_Libros"
+            headers = ["ID", "Título", "Idioma", "Géneros", "Copias Disponibles"]
+            rows = [
+                [p.id_libro, p.titulo_libro, p.idioma, p.generos, p.copias_disponibles]
+                for p in data
+            ]   
         elif report_type == 'active_loans':
             data = db.session.query(
                 User.id,
@@ -686,13 +716,13 @@ def download_report(report_type):
                 for p in data
             ]
 
-            
+           
         elif report_type == 'top_users':
             data = db.session.query(
                 User.ci,
                 func.count(Prestamo.id_prestamo).label('total_prestamos')
             ).join(
-                Prestamo, User.id_usuario == Prestamo.id_usuario
+                Prestamo, User.id == Prestamo.id_usuario
             ).group_by(
                 User.ci
             ).order_by(
@@ -731,3 +761,4 @@ if __name__ == '__main__':
     ##app.run(debug=True)
     port = int(os.environ.get("PORT", 5000))  # Render asigna el puerto dinámicamente
     app.run(host='0.0.0.0', port=port)
+    

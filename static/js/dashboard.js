@@ -31,12 +31,29 @@ function loadBooks(filters = {}) {
         tbody.innerHTML = '';
 
         data.forEach(book => {
+          // Extraer el nombre de la categoría correctamente
+          let categoryName = '—';
+          
+          if (book.category) {
+            // Si category es un objeto (versión antigua de la API)
+            if (typeof book.category === 'object' && book.category !== null) {
+              categoryName = book.category.name || '—';
+            } 
+            // Si category es un string (versión nueva de la API)
+            else if (typeof book.category === 'string') {
+              categoryName = book.category;
+            }
+          } else if (book.category_id) {
+            // Opcional: Si necesitas mostrar algo cuando hay category_id pero no category
+            categoryName = 'Sin categoría';
+          }
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>${book.id}</td>
             <td>${book.title}</td>
             <td>${book.author}</td>
-            <td>${book.category || '—'}</td>
+            <td>${categoryName}</td>
             <td>
               ${window.userRole === 'admin'
                 ? `<button onclick="editBook(${book.id})" class="btn btn-sm btn-warning">✏️ Editar</button>
@@ -48,9 +65,10 @@ function loadBooks(filters = {}) {
         });
       }
     })
-    .catch(() => {});
+    .catch(error => {
+      console.error('Error loading books:', error);
+    });
 }
-
 function setupBookForm() {
   const form = document.getElementById('bookForm');
   if (!form) return;
